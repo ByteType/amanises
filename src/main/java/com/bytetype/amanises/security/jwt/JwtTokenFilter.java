@@ -19,7 +19,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 public class JwtTokenFilter extends OncePerRequestFilter {
-
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenFilter.class);
 
     @Autowired
@@ -31,7 +30,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-
         String token = resolveToken(request);
 
         try {

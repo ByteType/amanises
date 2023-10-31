@@ -1,5 +1,7 @@
 package com.bytetype.amanises.model;
 
+import com.bytetype.amanises.payload.request.ParcelUserRequest;
+import com.bytetype.amanises.payload.request.SignupRequest;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -7,11 +9,9 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "username"),
-        @UniqueConstraint(columnNames = "email")
+        @UniqueConstraint(columnNames = "address")
 })
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,24 +22,19 @@ public class User {
 
     private String password;
 
+    private String phone;
+
+    @Column(unique = true)
+    private String address;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    public User(String username, String email, String password) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getUsername() {
@@ -66,11 +61,47 @@ public class User {
         this.email = email;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public Set<Role> getRoles() {
         return roles;
     }
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public static User createFrom(ParcelUserRequest request, Set<Role> roles) {
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(request.getPassword());
+        user.setPhone(request.getPhone());
+        user.setAddress(request.getAddress());
+        user.setRoles(roles);
+        return user;
+    }
+
+    public static User createFrom(SignupRequest request, String password) {
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(password);
+        user.setAddress(request.getAddress());
+        return user;
     }
 }

@@ -1,22 +1,21 @@
 package com.bytetype.amanises.payload.request;
 
-import jakarta.validation.constraints.NotBlank;
+public class ParcelUserRequest {
+    private Long id;
 
-import java.util.Set;
-
-public class SignupRequest {
-    @NotBlank
     private String username;
 
     private String email;
 
-    @NotBlank
     private String password;
 
-    @NotBlank
+    private String phone;
+
     private String address;
 
-    private Set<String> role;
+    public Long getId() {
+        return id;
+    }
 
     public String getUsername() {
         return username;
@@ -30,11 +29,11 @@ public class SignupRequest {
         return password;
     }
 
-    public String getAddress() {
-        return address;
+    public String getPhone() {
+        return phone;
     }
 
-    public Set<String> getRole() {
-        return this.role;
+    public String getAddress() {
+        return address;
     }
 }

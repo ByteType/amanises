@@ -1,5 +1,6 @@
 package com.bytetype.amanises.service;
 
+import com.bytetype.amanises.exception.NameExistException;
 import com.bytetype.amanises.model.Role;
 import com.bytetype.amanises.model.RoleType;
 import com.bytetype.amanises.model.User;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,8 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
-
+public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -42,40 +43,37 @@ public class UserService {
     @Autowired
     private PasswordEncoder encoder;
 
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
-    public ResponseEntity<?> authenticateUser(LoginRequest loginRequest) {
+    public UserInfoResponse authenticateUser(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        ResponseCookie jwtCookie = jwtTokenProvider.generateJwtCookie(userDetails);
-
         List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
+                .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                .body(new UserInfoResponse(userDetails.getId(),
-                        userDetails.getUsername(),
-                        userDetails.getEmail(),
-                        roles));
+        return new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles);
     }
 
-    public ResponseEntity<?> registerUser(SignupRequest signUpRequest) {
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
-        }
+    /**
+     * Register a user. If address exist, create a user upon the user.
+     * @param signUpRequest The register request
+     */
+    public void registerUser(SignupRequest signUpRequest) throws NameExistException {
+        if (userRepository.existsByUsername(signUpRequest.getUsername()))
+            throw new NameExistException();
 
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
-        }
+        User user;
 
-        User user = new User(signUpRequest.getUsername(),
-                signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword()));
+        if (userRepository.existsByAddress(signUpRequest.getAddress())) {
+            user = userRepository.findByAddress(signUpRequest.getAddress()).orElseThrow();
+            user.setUsername(signUpRequest.getUsername());
+            user.setEmail(signUpRequest.getEmail());
+            user.setPassword(encoder.encode(signUpRequest.getPassword()));
+            user.setAddress(signUpRequest.getAddress());
+        } else {
+            user = User.createFrom(signUpRequest, encoder.encode(signUpRequest.getPassword()));
+        }
 
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
@@ -107,13 +105,23 @@ public class UserService {
 
         user.setRoles(roles);
         userRepository.save(user);
-
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-    public ResponseEntity<?> logoutUser() {
-        ResponseCookie cookie = jwtTokenProvider.getCleanJwtCookie();
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new MessageResponse("You've been signed out!"));
+    public boolean removeUser(Long id) {
+        if (userRepository.existsById(id)) {
+            User user = userRepository.findById(id).orElse(null);
+            if (user == null) return false;
+
+            HashSet<Role> roles = new HashSet<>();
+            roles.add(roleRepository.findByName(RoleType.GUEST)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
+
+            user.setPassword(null);
+            user.setRoles(roles);
+
+            return true;
+        } else {
+            return false;
+        }
     }
 }
