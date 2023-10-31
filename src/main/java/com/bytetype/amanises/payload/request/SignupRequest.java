@@ -3,6 +3,7 @@ package com.bytetype.amanises.payload.request;
 import java.util.Set;
 
 public class SignupRequest {
+
     private String username;
 
     private String email;
