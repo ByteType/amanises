@@ -21,8 +21,8 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.3")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.3")
 
-	// postgresql
-	runtimeOnly("org.postgresql:postgresql")
+	// Mysql
+	implementation("com.mysql:mysql-connector-j:8.0.33")
 
 	// spring boot
 	implementation("org.springframework.boot:spring-boot-starter")

@@ -1,11 +1,10 @@
-package com.bytetype.amanises.dto;
+package com.bytetype.amanises.payload.request;
 
 public class LoginRequest {
-
     private String username;
+
     private String password;
 
-    // Getters and Setters
     public String getUsername() {
         return username;
     }
