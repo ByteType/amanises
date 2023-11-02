@@ -1,10 +1,8 @@
 package com.bytetype.amanises.config;
 
-
 import com.bytetype.amanises.security.UserDetailsServiceImpl;
 import com.bytetype.amanises.security.jwt.JwtAuthenticationEntryPoint;
 import com.bytetype.amanises.security.jwt.JwtTokenFilter;
-import com.bytetype.amanises.security.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,9 +21,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 

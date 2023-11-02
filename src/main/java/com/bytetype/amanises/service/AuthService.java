@@ -6,16 +6,11 @@ import com.bytetype.amanises.model.RoleType;
 import com.bytetype.amanises.model.User;
 import com.bytetype.amanises.payload.request.LoginRequest;
 import com.bytetype.amanises.payload.request.SignupRequest;
-import com.bytetype.amanises.payload.response.MessageResponse;
 import com.bytetype.amanises.payload.response.UserInfoResponse;
 import com.bytetype.amanises.repository.RoleRepository;
 import com.bytetype.amanises.repository.UserRepository;
 import com.bytetype.amanises.security.UserDetailsImpl;
-import com.bytetype.amanises.security.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,7 +36,7 @@ public class AuthService {
     private RoleRepository roleRepository;
 
     @Autowired
-    private PasswordEncoder encoder;
+    private PasswordEncoder passwordEncoder;
 
     public UserInfoResponse authenticateUser(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager
@@ -69,10 +64,10 @@ public class AuthService {
             user = userRepository.findByAddress(signUpRequest.getAddress()).orElseThrow();
             user.setUsername(signUpRequest.getUsername());
             user.setEmail(signUpRequest.getEmail());
-            user.setPassword(encoder.encode(signUpRequest.getPassword()));
+            user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
             user.setAddress(signUpRequest.getAddress());
         } else {
-            user = User.createFrom(signUpRequest, encoder.encode(signUpRequest.getPassword()));
+            user = User.createFrom(signUpRequest, passwordEncoder.encode(signUpRequest.getPassword()));
         }
 
         Set<String> strRoles = signUpRequest.getRole();

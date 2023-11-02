@@ -28,10 +28,18 @@ public class ParcelResponse {
 
     private String pickupCode;
 
-    public ParcelResponse(Long id, ParcelUserResponse sender, ParcelUserResponse recipient,
-                          Double width, Double height, Double depth, Double mass,
-                          LocalDateTime readyForPickupAt, LocalDateTime pickedUpAt,
-                          ParcelStatus status, String pickupCode) {
+    public ParcelResponse(
+            Long id,
+            ParcelUserResponse sender,
+            ParcelUserResponse recipient,
+            Double width,
+            Double height,
+            Double depth,
+            Double mass,
+            LocalDateTime readyForPickupAt,
+            LocalDateTime pickedUpAt,
+            ParcelStatus status,
+            String pickupCode) {
         this.id = id;
         this.sender = sender;
         this.recipient = recipient;

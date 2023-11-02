@@ -3,7 +3,6 @@ package com.bytetype.amanises.controller;
 import com.bytetype.amanises.exception.InvalidRecipientException;
 import com.bytetype.amanises.exception.InvalidSenderException;
 import com.bytetype.amanises.payload.request.ParcelRequest;
-import com.bytetype.amanises.payload.response.ParcelResponse;
 import com.bytetype.amanises.service.ParcelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

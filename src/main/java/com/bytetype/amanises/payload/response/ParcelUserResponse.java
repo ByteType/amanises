@@ -13,8 +13,7 @@ public class ParcelUserResponse {
 
     private String address;
 
-    public ParcelUserResponse(Long id, String username, String email, String phone,
-                              String address) {
+    public ParcelUserResponse(Long id, String username, String email, String phone, String address) {
         this.id = id;
         this.username = username;
         this.email = email;
