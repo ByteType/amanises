@@ -1,8 +1,6 @@
 package com.bytetype.amanises.controller;
 
-import com.bytetype.amanises.exception.InvalidRecipientException;
-import com.bytetype.amanises.exception.InvalidSenderException;
-import com.bytetype.amanises.payload.request.ParcelRequest;
+import com.bytetype.amanises.payload.request.ParcelDeliveryRequest;
 import com.bytetype.amanises.service.ParcelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,22 +18,22 @@ public class ParcelController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createParcel(@RequestBody ParcelRequest request) {
+    public ResponseEntity<?> createParcel(@RequestBody ParcelDeliveryRequest request) {
         try {
             return ResponseEntity.ok().body(parcelService.createParcel(request));
-        } catch (RuntimeException | InvalidRecipientException | InvalidSenderException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateParcel(@PathVariable(value = "id") Long id, @RequestBody ParcelRequest request) {
-        try {
-            return ResponseEntity.ok().body(parcelService.updateParcel(id, request));
-        } catch (RuntimeException | InvalidRecipientException | InvalidSenderException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<?> updateParcel(@PathVariable(value = "id") Long id, @RequestBody ParcelPickUpRequest request) {
+//        try {
+//            return ResponseEntity.ok().body(parcelService.updateParcel(id, request));
+//        } catch (RuntimeException | InvalidRecipientException | InvalidSenderException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteParcel(@PathVariable(value = "id") Long id) {

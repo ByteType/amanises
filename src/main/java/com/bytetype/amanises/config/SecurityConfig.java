@@ -3,6 +3,7 @@ package com.bytetype.amanises.config;
 import com.bytetype.amanises.security.UserDetailsServiceImpl;
 import com.bytetype.amanises.security.jwt.JwtAuthenticationEntryPoint;
 import com.bytetype.amanises.security.jwt.JwtTokenFilter;
+import com.bytetype.amanises.security.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,6 +65,11 @@ public class SecurityConfig {
         authProvider.setPasswordEncoder(passwordEncoder());
 
         return authProvider;
+    }
+
+    @Bean
+    public JwtTokenProvider authenticationJwtTokenProvider() {
+        return new JwtTokenProvider();
     }
 
     @Bean

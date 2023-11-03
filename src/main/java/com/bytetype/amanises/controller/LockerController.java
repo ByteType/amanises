@@ -1,13 +1,12 @@
 package com.bytetype.amanises.controller;
 
-import com.bytetype.amanises.model.Locker;
+import com.bytetype.amanises.payload.request.LockerRequest;
+import com.bytetype.amanises.payload.response.LockerResponse;
 import com.bytetype.amanises.service.LockerService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/lockers")
@@ -18,9 +17,21 @@ public class LockerController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getLockerById(@PathVariable Long id) {
         try {
-            Locker locker = lockerService.getLockerById(id);
-            return ResponseEntity.ok().body(locker);
-        } catch (RuntimeException exception) {
+            LockerResponse response = lockerService.getLockerStatusById(id);
+
+            return ResponseEntity.ok().body(response);
+        } catch (Exception exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createLocker(@Valid @RequestBody LockerRequest request) {
+        try {
+            LockerResponse response = lockerService.createLocker(request);
+
+            return ResponseEntity.ok().body(response);
+        } catch (Exception exception) {
             return ResponseEntity.badRequest().body(exception.getMessage());
         }
     }

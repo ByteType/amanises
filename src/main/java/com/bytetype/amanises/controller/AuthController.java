@@ -1,6 +1,5 @@
 package com.bytetype.amanises.controller;
 
-import com.bytetype.amanises.exception.NameExistException;
 import com.bytetype.amanises.payload.request.LoginRequest;
 import com.bytetype.amanises.payload.request.SignupRequest;
 import com.bytetype.amanises.payload.response.MessageResponse;
@@ -26,22 +25,29 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        UserInfoResponse response = authService.authenticateUser(loginRequest);
-        ResponseCookie jwtCookie = jwtTokenProvider.generateJwtCookie(response.getUsername());
+        try {
+            UserInfoResponse response = authService.authenticateUser(loginRequest);
+            ResponseCookie jwtCookie = jwtTokenProvider.generateJwtCookie(response.getUsername());
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                .body(response);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                    .body(response);
+        } catch (Exception exception) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(exception.getMessage()));
+        }
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         try {
-            authService.registerUser(signUpRequest);
+            UserInfoResponse response = authService.registerUser(signUpRequest);
+            ResponseCookie jwtCookie = jwtTokenProvider.generateJwtCookie(response.getUsername());
 
             return ResponseEntity.ok()
-                    .body(new MessageResponse("User registered successfully!"));
-        } catch (RuntimeException | NameExistException exception) {
+                    .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                    .body(response);
+        } catch (Exception exception) {
             return ResponseEntity.badRequest()
                     .body(new MessageResponse(exception.getMessage()));
         }
@@ -53,7 +59,7 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new MessageResponse("You've been signed out!"));
+                .body(new MessageResponse("Success: You've been signed out!"));
     }
 
     @DeleteMapping("/{id}")
@@ -69,7 +75,7 @@ public class AuthController {
                 return ResponseEntity.badRequest()
                         .header(HttpHeaders.SET_COOKIE, cookie.toString())
                         .body(new MessageResponse("Bad operation: Unsuccessful user query."));
-        } catch (RuntimeException exception) {
+        } catch (Exception exception) {
             return ResponseEntity.internalServerError()
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
                     .body(new MessageResponse("Unknown: Unknown Error"));

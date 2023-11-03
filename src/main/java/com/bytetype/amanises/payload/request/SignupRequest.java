@@ -1,5 +1,6 @@
 package com.bytetype.amanises.payload.request;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.Set;
@@ -8,6 +9,7 @@ public class SignupRequest {
     @NotBlank
     private String username;
 
+    @Email
     private String email;
 
     @NotBlank

@@ -1,9 +1,9 @@
 package com.bytetype.amanises.model;
 
-import com.bytetype.amanises.payload.request.ParcelRequest;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "parcels")
@@ -39,6 +39,11 @@ public class Parcel {
     private ParcelStatus status;
 
     private String pickupCode;
+
+    private String deliveryCode;
+
+    @OneToMany
+    private List<Locker> expectedLocker;
 
     public Long getId() {
         return id;
@@ -124,18 +129,19 @@ public class Parcel {
         this.pickupCode = pickupCode;
     }
 
-    public static Parcel createFrom(ParcelRequest request, User sender, User recipient) {
-        Parcel parcel = new Parcel();
-        parcel.setSender(sender);
-        parcel.setRecipient(recipient);
-        parcel.setWidth(request.getWidth());
-        parcel.setHeight(request.getHeight());
-        parcel.setDepth(request.getDepth());
-        parcel.setMass(request.getMass());
-        parcel.setReadyForPickupAt(request.getReadyForPickupAt());
-        parcel.setPickedUpAt(request.getPickedUpAt());
-        parcel.setStatus(request.getStatus());
-        parcel.setPickupCode(request.getPickupCode());
-        return parcel;
+    public String getDeliveryCode() {
+        return deliveryCode;
+    }
+
+    public void setDeliveryCode(String deliveryCode) {
+        this.deliveryCode = deliveryCode;
+    }
+
+    public List<Locker> getExpectedLocker() {
+        return expectedLocker;
+    }
+
+    public void setExpectedLocker(List<Locker> expectedLocker) {
+        this.expectedLocker = expectedLocker;
     }
 }

@@ -1,6 +1,8 @@
 package com.bytetype.amanises.service;
 
 import com.bytetype.amanises.exception.NameExistException;
+import com.bytetype.amanises.exception.RoleNotFoundException;
+import com.bytetype.amanises.exception.UserExistException;
 import com.bytetype.amanises.model.Role;
 import com.bytetype.amanises.model.RoleType;
 import com.bytetype.amanises.model.User;
@@ -38,9 +40,9 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public UserInfoResponse authenticateUser(LoginRequest loginRequest) {
+    public UserInfoResponse authenticateUser(LoginRequest request) {
         Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                .authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
@@ -52,64 +54,66 @@ public class AuthService {
 
     /**
      * Register a user. If address exist, create a user upon the user.
-     * @param signUpRequest The register request
+     * @param request The register request
+     * @return The user info
      */
-    public void registerUser(SignupRequest signUpRequest) throws NameExistException {
-        if (userRepository.existsByUsername(signUpRequest.getUsername()))
-            throw new NameExistException();
+    public UserInfoResponse registerUser(SignupRequest request) throws NameExistException, UserExistException, RoleNotFoundException {
+        if (userRepository.existsByUsername(request.getUsername())) throw new NameExistException();
 
         User user;
 
-        if (userRepository.existsByAddress(signUpRequest.getAddress())) {
-            user = userRepository.findByAddress(signUpRequest.getAddress()).orElseThrow();
-            user.setUsername(signUpRequest.getUsername());
-            user.setEmail(signUpRequest.getEmail());
-            user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-            user.setAddress(signUpRequest.getAddress());
+        if (userRepository.existsByAddress(request.getAddress())) {
+            user = userRepository.findByAddress(request.getAddress()).orElseThrow();
+            if (user.getRoles().isEmpty()) {
+                user.setUsername(request.getUsername());
+                user.setEmail(request.getEmail());
+                user.setPassword(passwordEncoder.encode(request.getPassword()));
+                user.setAddress(request.getAddress());
+            } else throw new UserExistException();
         } else {
-            user = User.createFrom(signUpRequest, passwordEncoder.encode(signUpRequest.getPassword()));
+            user = User.createFrom(request, passwordEncoder.encode(request.getPassword()));
         }
 
-        Set<String> strRoles = signUpRequest.getRole();
+        Set<String> strRoles = request.getRole();
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null) {
-            Role userRole = roleRepository.findByName(RoleType.GUEST)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
+            roles.add(roleRepository.findByName(RoleType.GUEST).orElseThrow(RoleNotFoundException::new));
         } else {
-            strRoles.forEach(role -> {
+            for (String role : strRoles) {
                 switch (role) {
                     case "user":
-                        Role userRole = roleRepository.findByName(RoleType.USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
+                        roles.add(roleRepository.findByName(RoleType.USER).orElseThrow(RoleNotFoundException::new));
                         break;
                     case "driver":
-                        Role driverRole = roleRepository.findByName(RoleType.DRIVER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(driverRole);
+                        roles.add(roleRepository.findByName(RoleType.DRIVER).orElseThrow(RoleNotFoundException::new));
                         break;
                     default:
-                        Role guestRole = roleRepository.findByName(RoleType.GUEST)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(guestRole);
+                        roles.add(roleRepository.findByName(RoleType.GUEST).orElseThrow(RoleNotFoundException::new));
                 }
-            });
+            }
         }
 
         user.setRoles(roles);
-        userRepository.save(user);
+        user = userRepository.save(user);
+
+        return new UserInfoResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRoles().stream()
+                        .map(role -> role.getName().toString())
+                        .collect(Collectors.toList())
+        );
     }
 
-    public boolean removeUser(Long id) {
+    public boolean removeUser(Long id) throws RoleNotFoundException {
         if (userRepository.existsById(id)) {
             User user = userRepository.findById(id).orElse(null);
             if (user == null) return false;
 
             HashSet<Role> roles = new HashSet<>();
-            roles.add(roleRepository.findByName(RoleType.GUEST)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
+            roles.add(roleRepository.findByName(RoleType.GUEST).orElseThrow(RoleNotFoundException::new));
 
             user.setPassword(null);
             user.setRoles(roles);

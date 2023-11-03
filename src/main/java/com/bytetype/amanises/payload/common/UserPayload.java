@@ -1,13 +1,13 @@
-package com.bytetype.amanises.payload.request;
+package com.bytetype.amanises.payload.common;
 
-public class ParcelUserRequest {
+import com.bytetype.amanises.model.User;
+
+public class UserPayload {
     private Long id;
 
     private String username;
 
     private String email;
-
-    private String password;
 
     private String phone;
 
@@ -37,14 +37,6 @@ public class ParcelUserRequest {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getPhone() {
         return phone;
     }
@@ -59,5 +51,16 @@ public class ParcelUserRequest {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public static UserPayload createFrom(User user) {
+        UserPayload payload = new UserPayload();
+        payload.setId(user.getId());
+        payload.setUsername(user.getUsername());
+        payload.setEmail(user.getEmail());
+        payload.setPhone(user.getPhone());
+        payload.setAddress(user.getAddress());
+
+        return payload;
     }
 }

@@ -1,6 +1,6 @@
 package com.bytetype.amanises.model;
 
-import com.bytetype.amanises.payload.request.ParcelUserRequest;
+import com.bytetype.amanises.payload.common.UserPayload;
 import com.bytetype.amanises.payload.request.SignupRequest;
 import jakarta.persistence.*;
 
@@ -24,7 +24,6 @@ public class User {
 
     private String phone;
 
-    @Column(unique = true)
     private String address;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -85,11 +84,10 @@ public class User {
         this.roles = roles;
     }
 
-    public static User createFrom(ParcelUserRequest request, Set<Role> roles) {
+    public static User createFrom(UserPayload request, Set<Role> roles) {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
         user.setPhone(request.getPhone());
         user.setAddress(request.getAddress());
         user.setRoles(roles);
