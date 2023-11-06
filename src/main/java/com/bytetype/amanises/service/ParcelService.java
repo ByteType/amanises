@@ -2,9 +2,11 @@ package com.bytetype.amanises.service;
 
 import com.bytetype.amanises.exception.InvalidRecipientException;
 import com.bytetype.amanises.exception.InvalidSenderException;
+import com.bytetype.amanises.exception.ParcelNotFoundException;
 import com.bytetype.amanises.exception.RoleNotFoundException;
 import com.bytetype.amanises.model.Parcel;
 import com.bytetype.amanises.model.User;
+import com.bytetype.amanises.payload.common.UserPayload;
 import com.bytetype.amanises.payload.request.ParcelDeliveryRequest;
 import com.bytetype.amanises.payload.response.ParcelDeliveryResponse;
 import com.bytetype.amanises.repository.ParcelRepository;
@@ -27,10 +29,8 @@ public class ParcelService {
     @Autowired
     private UserService userService;
 
-    public ParcelDeliveryResponse getParcelById(Long id) {
-        Parcel parcel = parcelRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Parcel not found with id: " + id));
-        return ParcelDeliveryResponse.createFrom(parcel);
+    public Parcel getParcelById(Long id) throws ParcelNotFoundException {
+        return parcelRepository.findById(id).orElseThrow(ParcelNotFoundException::new);
     }
 
     public ParcelDeliveryResponse createParcel(ParcelDeliveryRequest request) throws InvalidSenderException, InvalidRecipientException, RoleNotFoundException {
@@ -52,7 +52,18 @@ public class ParcelService {
 
         parcel = parcelRepository.save(parcel);
 
-        return ParcelDeliveryResponse.createFrom(parcel);
+        return new ParcelDeliveryResponse(
+                parcel.getId(),
+                UserPayload.createFrom(parcel.getSender()),
+                UserPayload.createFrom(parcel.getRecipient()),
+                parcel.getWidth(),
+                parcel.getHeight(),
+                parcel.getDepth(),
+                parcel.getMass(),
+                parcel.getStatus(),
+                parcel.getDeliveryCode(),
+                parcel.getExpectedLocker()
+        );
     }
 
     public void deleteParcel(Long id) {

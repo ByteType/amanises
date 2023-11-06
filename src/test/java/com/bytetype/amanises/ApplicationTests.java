@@ -21,12 +21,27 @@ class ApplicationTests {
 		assertThat(roleExists("DRIVER")).isTrue();
 	}
 
+	@Test
+	public void driverShouldBeCreateAtStartup() {
+		assertThat(driverExists("Driver")).isTrue();
+	}
+
 	private boolean roleExists(String roleName) {
 		Integer count = jdbcTemplate.queryForObject(
 				"SELECT COUNT(*) FROM roles WHERE name = ?",
 				Integer.class,
 				roleName
 		);
+		return count != null && count > 0;
+	}
+
+	private boolean driverExists(String userName) {
+		String verifyQuery = "SELECT COUNT(u.id) FROM users u " +
+				"JOIN user_roles ur ON u.id = ur.user_id " +
+				"JOIN roles r ON ur.role_id = r.id " +
+				"WHERE u.username = ?";
+
+		Integer count = jdbcTemplate.queryForObject(verifyQuery, Integer.class, userName);
 		return count != null && count > 0;
 	}
 }

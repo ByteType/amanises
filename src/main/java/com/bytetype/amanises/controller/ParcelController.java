@@ -14,7 +14,11 @@ public class ParcelController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getParcelById(@PathVariable(value = "id") Long id) {
-        return ResponseEntity.ok().body(parcelService.getParcelById(id));
+        try {
+            return ResponseEntity.ok().body(parcelService.getParcelById(id));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping

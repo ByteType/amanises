@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,6 +41,20 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Authenticates a user with given login credentials.
+     * <p>
+     * This method uses the {@link AuthenticationManager} to attempt to authenticate the user with
+     * the provided username and password. Upon successful authentication, it sets the corresponding
+     * {@link Authentication} object in the {@link SecurityContextHolder} to maintain the security context.
+     * It then extracts user details and authorities to create a {@link UserInfoResponse} object.
+     * </p>
+     *
+     * @param request the login request containing the user's credentials
+     * @return a {@link UserInfoResponse} containing the authenticated user's information, including their ID,
+     * username, email, and roles.
+     * @throws AuthenticationException if authentication fails due to invalid credentials or other authentication-related issues.
+     */
     public UserInfoResponse authenticateUser(LoginRequest request) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
@@ -53,9 +68,19 @@ public class AuthService {
     }
 
     /**
-     * Register a user. If address exist, create a user upon the user.
-     * @param request The register request
-     * @return The user info
+     * Registers a new user with the given sign-up request data.
+     * <p>
+     * This method checks if the username or address already exists in the database and throws corresponding exceptions
+     * if the conditions are not met. It either upgrade the existing guest user or creates a new user entry if the
+     * address is not found in the database. After setting the user roles based on the provided role names, it saves
+     * the new user record in the repository.
+     * </p>
+     *
+     * @param request the sign-up request containing the new user's information, such as username, password, email, and address.
+     * @return a {@link UserInfoResponse} containing the saved user's ID, username, email, and roles.
+     * @throws NameExistException if a user with the same username already exists in the system.
+     * @throws UserExistException if a user with the same address already exists in the system with roles assigned.
+     * @throws RoleNotFoundException if the role provided in the request does not exist.
      */
     public UserInfoResponse registerUser(SignupRequest request) throws NameExistException, UserExistException, RoleNotFoundException {
         if (userRepository.existsByUsername(request.getUsername())) throw new NameExistException();
@@ -107,6 +132,17 @@ public class AuthService {
         );
     }
 
+    /**
+     * Removes a user from the system by anonymizing their record.
+     * <p>
+     * This method attempts to find a user by their ID. If found, it anonymizes the user by setting their
+     * password to null and assigning them a 'GUEST' role. It does not delete the user record from the database.
+     * </p>
+     *
+     * @param id the unique identifier of the user to be removed.
+     * @return true if the user exists and has been anonymized successfully, false if the user does not exist.
+     * @throws RoleNotFoundException if the 'GUEST' role does not exist in the repository.
+     */
     public boolean removeUser(Long id) throws RoleNotFoundException {
         if (userRepository.existsById(id)) {
             User user = userRepository.findById(id).orElse(null);

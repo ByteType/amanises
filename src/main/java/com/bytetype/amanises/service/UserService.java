@@ -44,6 +44,17 @@ public class UserService {
         );
     }
 
+    /**
+     * Retrieves an existing user by ID or address or creates a new one with a GUEST role.
+     * <p>
+     * The method first attempts to locate an existing user by ID if provided. If no such user exists,
+     * it then tries to find a user by address. If the user is still not found, a new user record is created
+     * with a GUEST role and the other details provided in the request.
+     *
+     * @param request the user payload containing user identification or creation information
+     * @return the existing or newly created user, or null if the request does not contain an ID or address
+     * @throws RoleNotFoundException if the GUEST role is not present in the role repository
+     */
     public User getOrCreateUser(UserPayload request) throws RoleNotFoundException {
         if (request.getId() != null) {
             User user = userRepository.findById(request.getId()).orElse(null);
