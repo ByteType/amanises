@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RoleInject implements CommandLineRunner {
+public class UserRoleDataInject implements CommandLineRunner {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 

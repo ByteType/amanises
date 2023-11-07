@@ -30,13 +30,13 @@ public class Parcel {
     private Double mass;
 
     // Object related information
-    private LocalDateTime readyForPickupAt;
-
-    private LocalDateTime pickedUpAt;
-
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private ParcelStatus status;
+
+    private LocalDateTime readyForPickupAt;
+
+    private LocalDateTime pickedUpAt;
 
     private String pickupCode;
 

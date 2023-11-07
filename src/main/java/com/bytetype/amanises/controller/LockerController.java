@@ -2,6 +2,7 @@ package com.bytetype.amanises.controller;
 
 import com.bytetype.amanises.payload.request.LockerRequest;
 import com.bytetype.amanises.payload.response.LockerResponse;
+import com.bytetype.amanises.payload.response.MessageResponse;
 import com.bytetype.amanises.service.LockerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +20,11 @@ public class LockerController {
         try {
             LockerResponse response = lockerService.getLockerStatusById(id);
 
-            return ResponseEntity.ok().body(response);
+            return ResponseEntity.ok()
+                    .body(response);
         } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(exception.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(exception.getMessage()));
         }
     }
 
@@ -30,9 +33,11 @@ public class LockerController {
         try {
             LockerResponse response = lockerService.createLocker(request);
 
-            return ResponseEntity.ok().body(response);
+            return ResponseEntity.ok()
+                    .body(response);
         } catch (Exception exception) {
-            return ResponseEntity.badRequest().body(exception.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(exception.getMessage()));
         }
     }
 }

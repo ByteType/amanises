@@ -17,7 +17,7 @@ public class Cabinet {
     @JoinColumn(name = "parcel_id")
     private Parcel parcel;
 
-    private Boolean isLocked = true;
+    private Boolean isLocked = false;
 
     public Long getId() {
         return id;

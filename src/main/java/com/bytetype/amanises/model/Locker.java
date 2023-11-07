@@ -14,8 +14,6 @@ public class Locker {
 
     private String location;
 
-    private Integer size;
-
     @OneToMany(mappedBy = "locker", cascade = CascadeType.ALL)
     private List<Cabinet> cabinets = new ArrayList<>();
 
@@ -29,14 +27,6 @@ public class Locker {
 
     public void setLocation(String location) {
         this.location = location;
-    }
-
-    public Integer getSize() {
-        return size;
-    }
-
-    public void setSize(Integer size) {
-        this.size = size;
     }
 
     public List<Cabinet> getCabinets() {
