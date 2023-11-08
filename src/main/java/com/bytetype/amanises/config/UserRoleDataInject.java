@@ -1,46 +1,55 @@
 package com.bytetype.amanises.config;
 
+import com.bytetype.amanises.exception.RoleNotFoundException;
+import com.bytetype.amanises.model.Role;
+import com.bytetype.amanises.model.RoleType;
+import com.bytetype.amanises.model.User;
+import com.bytetype.amanises.repository.RoleRepository;
+import com.bytetype.amanises.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Component
 public class UserRoleDataInject implements CommandLineRunner {
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
-    public void run(String... args) {
-        // Inject default roles
-        insertRoleIfNotExists("GUEST");
-        insertRoleIfNotExists("USER");
-        insertRoleIfNotExists("DRIVER");
-        // Inject default account
+    public void run(String... args) throws RoleNotFoundException {
+        insertRolesIfNotExists();
         insertDriverIfNotExists();
     }
 
-    private void insertRoleIfNotExists(String roleName) {
-        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM roles WHERE name = ?", Integer.class, roleName);
-        if (count != null && count == 0) {
-            jdbcTemplate.update("INSERT INTO roles(name) VALUES(?)", roleName);
-        }
+    private void insertRolesIfNotExists() {
+        List<Role> roles = Arrays.stream(RoleType.values())
+                .map(roleType -> {
+                    Role role = new Role();
+                    role.setName(roleType);
+                    return roleRepository.findByName(roleType).orElse(role);
+                })
+                .toList();
+
+        roleRepository.saveAllAndFlush(roles);
     }
 
-    private void insertDriverIfNotExists() {
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM users u " +
-                "JOIN user_roles ur ON u.id = ur.user_id " +
-                "JOIN roles r ON ur.role_id = r.id " +
-                "WHERE r.name = ?",
-                Integer.class,
-                "DRIVER"
-        );
-        if (count != null && count == 0) {
-            jdbcTemplate.update("INSERT INTO users (username, password) VALUES (?, ?)", "Driver", "Password");
-            Long newUserId = jdbcTemplate.queryForObject("SELECT id FROM users WHERE username = ?", Long.class, "Driver");
-            Long roleId = jdbcTemplate.queryForObject("SELECT id FROM roles WHERE name = ?", Long.class, "DRIVER");
-            jdbcTemplate.update("INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)", newUserId, roleId);
+    private void insertDriverIfNotExists() throws RoleNotFoundException {
+        if (userRepository.findByRoleType(RoleType.DRIVER).isEmpty()) {
+            Set<Role> roles = new HashSet<>();
+            roles.add(roleRepository.findByName(RoleType.DRIVER).orElseThrow(RoleNotFoundException::new));
+            User user = new User();
+            user.setUsername("Driver");
+            user.setPassword("Password");
+            user.setRoles(roles);
+            userRepository.saveAndFlush(user);
         }
     }
 }

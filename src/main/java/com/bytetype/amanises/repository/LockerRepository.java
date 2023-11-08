@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface LockerRepository extends JpaRepository<Locker, Long> {
     @Query("SELECT l FROM Locker l LEFT JOIN FETCH l.cabinets WHERE l.id = :id")
     Optional<Locker> findByIdWithCabinets(@Param("id") Long id);
+
+    Optional<Locker> findByLocation(String location);
 }

@@ -1,5 +1,6 @@
 package com.bytetype.amanises;
 
+import com.bytetype.amanises.exception.RoleNotFoundException;
 import com.bytetype.amanises.model.Role;
 import com.bytetype.amanises.model.RoleType;
 import com.bytetype.amanises.model.User;
@@ -48,18 +49,17 @@ public class AuthControllerTest {
     private final String password = "testPassword";
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws RoleNotFoundException {
         Set<Role> roles = new HashSet<>();
-        Role userRole = roleRepository.findByName(RoleType.USER)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-        roles.add(userRole);
+        roles.add(roleRepository.findByName(RoleType.USER).orElseThrow(RoleNotFoundException::new));
         User user = new User();
         user.setUsername(username);
         user.setEmail("testUser@testDomain.com");
         user.setPassword(passwordEncoder.encode(password));
         user.setAddress("123 Main St, Apt 4");
         user.setRoles(roles);
-        userRepository.save(user);
+
+        userRepository.saveAndFlush(user);
     }
 
     @AfterEach
