@@ -1,7 +1,7 @@
 package com.bytetype.amanises.model;
 
 public enum RoleType {
-    GUEST,
-    USER,
-    DRIVER
+    ROLE_GUEST,
+    ROLE_USER,
+    ROLE_DRIVER
 }

@@ -37,9 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
                                 .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/guest/**").hasRole("GUEST")
                                 .requestMatchers("/api/user/**").hasRole("USER")
-                                .requestMatchers("/api/driver/**").hasRole("DRIVER")
                                 .anyRequest().authenticated()
                 );
 

@@ -9,15 +9,14 @@ import com.bytetype.amanises.payload.request.SignupRequest;
 import com.bytetype.amanises.repository.RoleRepository;
 import com.bytetype.amanises.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.HashSet;
@@ -27,8 +26,10 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMockMvc
+@SpringBootTest
+@ActiveProfiles("test")
 public class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -48,10 +49,10 @@ public class AuthControllerTest {
     private final String username = "testUser";
     private final String password = "testPassword";
 
-    @BeforeEach
-    public void setUp() throws RoleNotFoundException {
+    @BeforeAll
+    public void init() throws RoleNotFoundException {
         Set<Role> roles = new HashSet<>();
-        roles.add(roleRepository.findByName(RoleType.USER).orElseThrow(RoleNotFoundException::new));
+        roles.add(roleRepository.findByName(RoleType.ROLE_USER).orElseThrow(RoleNotFoundException::new));
         User user = new User();
         user.setUsername(username);
         user.setEmail("testUser@testDomain.com");
@@ -62,20 +63,17 @@ public class AuthControllerTest {
         userRepository.saveAndFlush(user);
     }
 
-    @AfterEach
-    public void cleanup() {
-        userRepository.deleteAll();
-    }
-
     @Test
     public void testAuthenticateUser() throws Exception {
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setUsername(username);
         loginRequest.setPassword(password);
 
+        String body = objectMapper.writeValueAsString(loginRequest);
+
         mockMvc.perform(post("/api/auth/signin")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
+                        .content(body))
                 .andExpect(status().isOk());
     }
 
@@ -89,6 +87,7 @@ public class AuthControllerTest {
         signUpRequest.setPassword("newPassword");
         signUpRequest.setAddress("987 Main St, Apt 6");
         signUpRequest.setRole(roles);
+
         String body = objectMapper.writeValueAsString(signUpRequest);
 
         mockMvc.perform(post("/api/auth/signup")

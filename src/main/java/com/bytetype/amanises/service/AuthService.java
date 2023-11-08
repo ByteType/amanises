@@ -103,18 +103,18 @@ public class AuthService {
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null) {
-            roles.add(roleRepository.findByName(RoleType.GUEST).orElseThrow(RoleNotFoundException::new));
+            roles.add(roleRepository.findByName(RoleType.ROLE_GUEST).orElseThrow(RoleNotFoundException::new));
         } else {
             for (String role : strRoles) {
                 switch (role) {
                     case "user":
-                        roles.add(roleRepository.findByName(RoleType.USER).orElseThrow(RoleNotFoundException::new));
+                        roles.add(roleRepository.findByName(RoleType.ROLE_USER).orElseThrow(RoleNotFoundException::new));
                         break;
                     case "driver":
-                        roles.add(roleRepository.findByName(RoleType.DRIVER).orElseThrow(RoleNotFoundException::new));
+                        roles.add(roleRepository.findByName(RoleType.ROLE_DRIVER).orElseThrow(RoleNotFoundException::new));
                         break;
                     default:
-                        roles.add(roleRepository.findByName(RoleType.GUEST).orElseThrow(RoleNotFoundException::new));
+                        roles.add(roleRepository.findByName(RoleType.ROLE_GUEST).orElseThrow(RoleNotFoundException::new));
                 }
             }
         }
@@ -149,7 +149,7 @@ public class AuthService {
             if (user == null) return false;
 
             HashSet<Role> roles = new HashSet<>();
-            roles.add(roleRepository.findByName(RoleType.GUEST).orElseThrow(RoleNotFoundException::new));
+            roles.add(roleRepository.findByName(RoleType.ROLE_GUEST).orElseThrow(RoleNotFoundException::new));
 
             user.setPassword(null);
             user.setRoles(roles);

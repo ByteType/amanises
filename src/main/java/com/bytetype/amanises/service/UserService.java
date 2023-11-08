@@ -69,7 +69,7 @@ public class UserService {
             if (user != null) return user;
 
             HashSet<Role> roles = new HashSet<>();
-            roles.add(roleRepository.findByName(RoleType.GUEST).orElseThrow(RoleNotFoundException::new));
+            roles.add(roleRepository.findByName(RoleType.ROLE_GUEST).orElseThrow(RoleNotFoundException::new));
 
             user = User.createFrom(request, roles);
 
