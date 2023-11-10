@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ParcelRepository extends JpaRepository<Parcel, Long> {
+
     @Query("SELECT p FROM Parcel p WHERE p.sender.id = :userId OR p.recipient.id = :userId")
     List<Parcel> findBySenderIdOrRecipientId(@Param("userId") Long userId);
 }

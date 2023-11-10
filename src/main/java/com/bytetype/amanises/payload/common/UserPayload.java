@@ -3,6 +3,7 @@ package com.bytetype.amanises.payload.common;
 import com.bytetype.amanises.model.User;
 
 public class UserPayload {
+
     private Long id;
 
     private String username;

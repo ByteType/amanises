@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class ParcelDeliveryResponse extends ParcelPayload {
+
     private Long id;
 
     private LocalDateTime readyForPickupAt;

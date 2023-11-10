@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class ParcelDeliveryRequest extends ParcelPayload {
+
     private LocalDateTime readyForPickupAt; // Expected arrive time.
 
     private List<Locker> expectedLocker;

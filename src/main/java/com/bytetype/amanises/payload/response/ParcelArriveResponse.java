@@ -5,6 +5,7 @@ import com.bytetype.amanises.payload.common.ParcelPayload;
 import com.bytetype.amanises.payload.common.UserPayload;
 
 public class ParcelArriveResponse extends ParcelPayload {
+
     private Long id;
 
     private String pickupCode;

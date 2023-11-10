@@ -3,6 +3,7 @@ package com.bytetype.amanises.payload.request;
 import java.time.LocalDateTime;
 
 public class ParcelPickUpRequest {
+
     private Long id;
 
     private LocalDateTime pickedUpAt; // Require precises timing

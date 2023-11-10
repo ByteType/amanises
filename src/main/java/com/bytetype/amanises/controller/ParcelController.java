@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/parcels")
 public class ParcelController {
+
     @Autowired
     private ParcelService parcelService;
 

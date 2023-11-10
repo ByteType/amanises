@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 public class UserDetailResponse extends UserPayload {
+
     private Set<Role> roles;
 
     private List<ParcelPayload> parcels;

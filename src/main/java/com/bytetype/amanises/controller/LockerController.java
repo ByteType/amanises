@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/lockers")
 public class LockerController {
+
     @Autowired
     private LockerService lockerService;
 

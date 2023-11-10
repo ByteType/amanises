@@ -1,6 +1,7 @@
 package com.bytetype.amanises.payload.response;
 
 public class MessageResponse {
+
     private String message;
 
     public MessageResponse(String message) {

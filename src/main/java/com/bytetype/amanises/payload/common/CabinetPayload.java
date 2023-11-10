@@ -3,6 +3,7 @@ package com.bytetype.amanises.payload.common;
 import com.bytetype.amanises.model.Cabinet;
 
 public class CabinetPayload {
+
     private Long id;
 
     private Boolean isLocked;

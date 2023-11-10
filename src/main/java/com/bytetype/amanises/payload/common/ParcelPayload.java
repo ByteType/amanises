@@ -4,6 +4,7 @@ import com.bytetype.amanises.model.Parcel;
 import com.bytetype.amanises.model.ParcelStatus;
 
 public class ParcelPayload {
+
     private UserPayload sender;
 
     private UserPayload recipient;

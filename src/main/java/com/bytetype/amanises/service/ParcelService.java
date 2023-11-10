@@ -22,6 +22,7 @@ import java.security.SecureRandom;
 
 @Service
 public class ParcelService {
+
     private static final SecureRandom secureRandom = new SecureRandom();
 
     @Autowired

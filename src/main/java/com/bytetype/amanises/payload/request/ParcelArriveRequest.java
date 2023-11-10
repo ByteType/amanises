@@ -5,6 +5,7 @@ import com.bytetype.amanises.model.Locker;
 import java.time.LocalDateTime;
 
 public class ParcelArriveRequest {
+
     private Long id;
 
     private LocalDateTime readyForPickupAt; // Time arrive.

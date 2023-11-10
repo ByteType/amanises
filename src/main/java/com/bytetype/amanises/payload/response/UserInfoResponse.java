@@ -3,6 +3,7 @@ package com.bytetype.amanises.payload.response;
 import java.util.List;
 
 public class UserInfoResponse {
+
     private Long id;
 
     private String username;

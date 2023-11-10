@@ -1,6 +1,7 @@
 package com.bytetype.amanises.payload.request;
 
 public class LockerRequest {
+
     private String location;
 
     private Integer size;

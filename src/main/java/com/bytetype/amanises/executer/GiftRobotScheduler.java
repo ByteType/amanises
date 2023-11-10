@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GiftRobotScheduler {
-    private static final Logger logger = LoggerFactory.getLogger(GiftRobotScheduler.class);
 
+    private static final Logger logger = LoggerFactory.getLogger(GiftRobotScheduler.class);
 
     @Value("${app.schedules.enable}")
     private boolean isScheduleEnabled;

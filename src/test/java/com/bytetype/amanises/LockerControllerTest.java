@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles("test")
 public class LockerControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 

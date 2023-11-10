@@ -20,6 +20,7 @@ import java.util.Set;
 
 @Component
 public class DataBaseInjector {
+
     private static final Logger logger = LoggerFactory.getLogger(DataBaseInjector.class);
 
     @Autowired

@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
+
     @Autowired
     private AuthenticationManager authenticationManager;
 

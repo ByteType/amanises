@@ -7,6 +7,7 @@ import com.bytetype.amanises.payload.common.UserPayload;
 import java.time.LocalDateTime;
 
 public class ParcelPickUpResponse extends ParcelPayload {
+
     private Long id;
 
     private LocalDateTime pickedUpAt;

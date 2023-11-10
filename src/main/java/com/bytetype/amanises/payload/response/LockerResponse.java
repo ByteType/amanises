@@ -5,6 +5,7 @@ import com.bytetype.amanises.payload.common.CabinetPayload;
 import java.util.List;
 
 public class LockerResponse {
+
     private String location;
 
     private List<CabinetPayload> cabinets;

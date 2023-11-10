@@ -8,6 +8,7 @@ import java.util.List;
 @Entity
 @Table(name = "lockers")
 public class Locker {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
