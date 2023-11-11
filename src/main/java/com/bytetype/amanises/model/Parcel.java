@@ -30,7 +30,7 @@ public class Parcel {
 
     private Double mass;
 
-    // Object related information
+    // Status related information
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private ParcelStatus status;

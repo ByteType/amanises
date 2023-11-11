@@ -29,6 +29,21 @@ public class UserService {
     @Autowired
     private ParcelRepository parcelRepository;
 
+    /**
+     * Retrieves a detailed response object for a user by their unique identifier.
+     * <p>
+     * This method attempts to fetch a user from the database using their ID. If the user
+     * is found, it constructs a detailed user response that includes their basic information
+     * and a list of parcels associated with them, either as sender or recipient.
+     *
+     * @param id the unique identifier of the user to be retrieved.
+     * @return UserDetailResponse containing the user's id, username, email, phone number,
+     *         address, roles, and associated parcels.
+     * @throws UserNotFoundException if no user with the given id is found in the database.
+     *                               This exception is a custom exception that should be
+     *                               defined elsewhere in the application to indicate this
+     *                               specific error condition.
+     */
     public UserDetailResponse getUserById(Long id) throws UserNotFoundException {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
 
