@@ -8,8 +8,11 @@ import com.bytetype.amanises.payload.request.LoginRequest;
 import com.bytetype.amanises.payload.request.SignupRequest;
 import com.bytetype.amanises.repository.RoleRepository;
 import com.bytetype.amanises.repository.UserRepository;
+import com.bytetype.amanises.utility.UserUtilities;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +23,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.HashSet;
-import java.util.Set;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -47,28 +49,36 @@ public class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final String username = "testUser";
-    private final String password = "testPassword";
+    private static class DataSet {
+        private static final String[] username = { "AuthControllerTestUser1", "AuthControllerTestUser2" };
+
+        private static final String[] email = { "AuthControllerTestUser1@testDomain.com", "AuthControllerTestUser2@testDomain.com" };
+
+        private static final String[] password = { "testPassword1", "testPassword2" };
+
+        private static final String[] address = { "123 Main St, AuthControllerTestTown, NA", "456 Main St, AuthControllerTestTown, NA" };
+
+        private static final String[] role = { "user", "user" };
+    }
 
     @BeforeAll
     public void init() throws RoleNotFoundException {
-        Set<Role> roles = new HashSet<>();
-        roles.add(roleRepository.findByName(RoleType.ROLE_USER).orElseThrow(RoleNotFoundException::new));
-        User user = new User();
-        user.setUsername(username);
-        user.setEmail("testUser@testDomain.com");
-        user.setPassword(passwordEncoder.encode(password));
-        user.setAddress("123 Main St, Apt 4");
-        user.setRoles(roles);
+        Role role = roleRepository.findByName(RoleType.ROLE_USER).orElseThrow(RoleNotFoundException::new);
 
-        userRepository.saveAndFlush(user);
+        userRepository.saveAndFlush(UserUtilities.createUser(
+                DataSet.username[0],
+                DataSet.email[0],
+                passwordEncoder.encode(DataSet.password[0]),
+                DataSet.address[0],
+                role
+        ));
     }
 
     @Test
     public void testAuthenticateUser() throws Exception {
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername(username);
-        loginRequest.setPassword(password);
+        loginRequest.setUsername(DataSet.username[1]);
+        loginRequest.setPassword(DataSet.password[1]);
 
         String body = objectMapper.writeValueAsString(loginRequest);
 
@@ -81,12 +91,12 @@ public class AuthControllerTest {
     @Test
     public void testRegisterUser() throws Exception {
         HashSet<String> roles = new HashSet<>();
-        roles.add("user");
+        roles.add(DataSet.role[1]);
         SignupRequest signUpRequest = new SignupRequest();
-        signUpRequest.setUsername("newUser");
-        signUpRequest.setEmail("newUser@example.com");
-        signUpRequest.setPassword("newPassword");
-        signUpRequest.setAddress("987 Main St, Apt 6");
+        signUpRequest.setUsername(DataSet.username[1]);
+        signUpRequest.setEmail(DataSet.email[1]);
+        signUpRequest.setPassword(DataSet.password[1]);
+        signUpRequest.setAddress(DataSet.address[1]);
         signUpRequest.setRole(roles);
 
         String body = objectMapper.writeValueAsString(signUpRequest);
@@ -97,12 +107,12 @@ public class AuthControllerTest {
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(header().exists(HttpHeaders.SET_COOKIE))
-                .andExpect(jsonPath("$.username").value("newUser"))
-                .andExpect(jsonPath("$.email").value("newUser@example.com"));
+                .andExpect(jsonPath("$.username").value(DataSet.username[1]))
+                .andExpect(jsonPath("$.email").value(DataSet.email[1]));
 
         // Verify the user is saved in the database
-        User registeredUser = userRepository.findByUsername("newUser").orElse(null);
+        User registeredUser = userRepository.findByUsername(DataSet.username[1]).orElse(null);
         assert registeredUser != null;
-        assert passwordEncoder.matches("newPassword", registeredUser.getPassword());
+        assert passwordEncoder.matches(DataSet.password[1], registeredUser.getPassword());
     }
 }
