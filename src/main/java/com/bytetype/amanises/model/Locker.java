@@ -1,5 +1,6 @@
 package com.bytetype.amanises.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -18,6 +19,9 @@ public class Locker {
     @OneToMany(mappedBy = "locker", cascade = CascadeType.ALL)
     private List<Cabinet> cabinets = new ArrayList<>();
 
+    @OneToMany(mappedBy = "locker")
+    private List<ParcelExpect> expectedLocker;
+
     public Long getId() {
         return id;
     }
@@ -30,6 +34,7 @@ public class Locker {
         this.location = location;
     }
 
+    @JsonManagedReference
     public List<Cabinet> getCabinets() {
         return cabinets;
     }

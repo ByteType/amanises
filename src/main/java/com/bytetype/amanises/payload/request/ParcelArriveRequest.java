@@ -1,7 +1,5 @@
 package com.bytetype.amanises.payload.request;
 
-import com.bytetype.amanises.model.Locker;
-
 import java.time.LocalDateTime;
 
 public class ParcelArriveRequest {
@@ -9,8 +7,6 @@ public class ParcelArriveRequest {
     private Long id;
 
     private LocalDateTime readyForPickupAt; // Time arrive.
-
-    private Locker locker;
 
     private Long cabinetId;
 
@@ -28,14 +24,6 @@ public class ParcelArriveRequest {
 
     public void setReadyForPickupAt(LocalDateTime readyForPickupAt) {
         this.readyForPickupAt = readyForPickupAt;
-    }
-
-    public Locker getLocker() {
-        return locker;
-    }
-
-    public void setLocker(Locker locker) {
-        this.locker = locker;
     }
 
     public Long getCabinetId() {

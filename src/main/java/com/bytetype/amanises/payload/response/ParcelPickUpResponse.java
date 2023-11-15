@@ -10,6 +10,8 @@ public class ParcelPickUpResponse extends ParcelPayload {
 
     private Long id;
 
+    private ParcelStatus status;
+
     private LocalDateTime pickedUpAt;
 
     public ParcelPickUpResponse(
@@ -24,6 +26,7 @@ public class ParcelPickUpResponse extends ParcelPayload {
             LocalDateTime pickedUpAt
     ) {
         this.id = id;
+        this.status = status;
         this.pickedUpAt = pickedUpAt;
         this.setSender(sender);
         this.setRecipient(recipient);
@@ -31,7 +34,6 @@ public class ParcelPickUpResponse extends ParcelPayload {
         this.setHeight(height);
         this.setDepth(depth);
         this.setMass(mass);
-        this.setStatus(status);
     }
 
     public Long getId() {
@@ -40,6 +42,14 @@ public class ParcelPickUpResponse extends ParcelPayload {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public ParcelStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ParcelStatus status) {
+        this.status = status;
     }
 
     public LocalDateTime getPickedUpAt() {

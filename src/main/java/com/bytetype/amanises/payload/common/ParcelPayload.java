@@ -1,7 +1,6 @@
 package com.bytetype.amanises.payload.common;
 
 import com.bytetype.amanises.model.Parcel;
-import com.bytetype.amanises.model.ParcelStatus;
 
 public class ParcelPayload {
 
@@ -16,8 +15,6 @@ public class ParcelPayload {
     private Double depth;
 
     private Double mass;
-
-    private ParcelStatus status;
 
     public UserPayload getSender() {
         return sender;
@@ -67,14 +64,6 @@ public class ParcelPayload {
         this.mass = mass;
     }
 
-    public ParcelStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ParcelStatus status) {
-        this.status = status;
-    }
-
     public static ParcelPayload createFrom(Parcel parcel) {
         ParcelPayload payload = new ParcelPayload();
         payload.setSender(UserPayload.createFrom(parcel.getSender()));
@@ -83,7 +72,6 @@ public class ParcelPayload {
         payload.setHeight(parcel.getHeight());
         payload.setDepth(parcel.getDepth());
         payload.setMass(parcel.getMass());
-        payload.setStatus(parcel.getStatus());
 
         return payload;
     }

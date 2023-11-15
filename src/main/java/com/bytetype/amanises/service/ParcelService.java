@@ -1,10 +1,7 @@
 package com.bytetype.amanises.service;
 
 import com.bytetype.amanises.exception.*;
-import com.bytetype.amanises.model.Cabinet;
-import com.bytetype.amanises.model.Parcel;
-import com.bytetype.amanises.model.ParcelStatus;
-import com.bytetype.amanises.model.User;
+import com.bytetype.amanises.model.*;
 import com.bytetype.amanises.payload.common.ParcelPayload;
 import com.bytetype.amanises.payload.common.UserPayload;
 import com.bytetype.amanises.payload.request.ParcelArriveRequest;
@@ -14,11 +11,16 @@ import com.bytetype.amanises.payload.response.ParcelArriveResponse;
 import com.bytetype.amanises.payload.response.ParcelDeliveryResponse;
 import com.bytetype.amanises.payload.response.ParcelPickUpResponse;
 import com.bytetype.amanises.repository.CabinetRepository;
+import com.bytetype.amanises.repository.LockerRepository;
+import com.bytetype.amanises.repository.ParcelExpectRepository;
 import com.bytetype.amanises.repository.ParcelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ParcelService {
@@ -29,7 +31,13 @@ public class ParcelService {
     private CabinetRepository cabinetRepository;
 
     @Autowired
+    private LockerRepository lockerRepository;
+
+    @Autowired
     private ParcelRepository parcelRepository;
+
+    @Autowired
+    private ParcelExpectRepository parcelExpectRepository;
 
     @Autowired
     private UserService userService;
@@ -40,7 +48,7 @@ public class ParcelService {
         return ParcelPayload.createFrom(parcel);
     }
 
-    public ParcelDeliveryResponse deliveryParcel(ParcelDeliveryRequest request) throws InvalidSenderException, InvalidRecipientException, RoleNotFoundException {
+    public ParcelDeliveryResponse deliveryParcel(ParcelDeliveryRequest request) throws InvalidSenderException, InvalidRecipientException, RoleNotFoundException, InvalidLockerException {
         User sender = userService.getOrCreateUser(request.getSender());
         if (sender == null) throw new InvalidSenderException();
 
@@ -48,16 +56,27 @@ public class ParcelService {
         if (recipient == null) throw new InvalidRecipientException();
 
         Parcel parcel = new Parcel();
+        parcel.setSender(sender);
+        parcel.setRecipient(recipient);
         parcel.setWidth(request.getWidth());
         parcel.setHeight(request.getHeight());
         parcel.setDepth(request.getDepth());
         parcel.setMass(request.getMass());
-        parcel.setStatus(request.getStatus());
+        parcel.setStatus(ParcelStatus.DELIVERED);
         parcel.setReadyForPickupAt(request.getReadyForPickupAt());
         parcel.setDeliveryCode(generateCode(6));
-        parcel.setExpectedLocker(request.getExpectedLocker());
+
+        List<ParcelExpect> parcelExpects = new ArrayList<>();
+        for (Long lockerId : request.getExpectedLockerId()) {
+            Locker locker = lockerRepository.findById(lockerId).orElseThrow(InvalidLockerException::new);
+            ParcelExpect parcelExpect = new ParcelExpect();
+            parcelExpect.setLocker(locker);
+            parcelExpect.setParcel(parcel);
+            parcelExpects.add(parcelExpect);
+        }
 
         parcel = parcelRepository.save(parcel);
+        parcelExpects = parcelExpectRepository.saveAll(parcelExpects);
 
         return new ParcelDeliveryResponse(
                 parcel.getId(),
@@ -70,7 +89,9 @@ public class ParcelService {
                 parcel.getStatus(),
                 parcel.getReadyForPickupAt(),
                 parcel.getDeliveryCode(),
-                parcel.getExpectedLocker()
+                parcelExpects.stream()
+                        .map(ParcelExpect::getLocker)
+                        .collect(Collectors.toList())
         );
     }
 
@@ -102,9 +123,12 @@ public class ParcelService {
         );
     }
 
-    public ParcelPickUpResponse pickUpParcel(ParcelPickUpRequest request) throws ParcelNotFoundException, CabinetNotFoundException {
+    public ParcelPickUpResponse pickUpParcel(ParcelPickUpRequest request) throws Exception {
         Cabinet cabinet = cabinetRepository.findByParcelId(request.getId()).orElseThrow(CabinetNotFoundException::new);
         Parcel parcel = cabinet.getParcel();
+
+        if (!cabinet.getParcel().getPickupCode().equals(request.getPickupCode()))
+            throw new Exception("PickupCode incorrect");
 
         parcel.setStatus(ParcelStatus.PICKED_UP);
         parcel.setPickedUpAt(request.getPickedUpAt());

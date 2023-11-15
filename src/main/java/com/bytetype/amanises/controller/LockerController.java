@@ -29,6 +29,19 @@ public class LockerController {
         }
     }
 
+    @GetMapping
+    public ResponseEntity<?> getLockerByLocation(@RequestParam String location) {
+        try {
+            LockerResponse response = lockerService.getLockerStatusByLocation(location);
+
+            return ResponseEntity.ok()
+                    .body(response);
+        } catch (Exception exception) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(exception.getMessage()));
+        }
+    }
+
     @PostMapping
     public ResponseEntity<?> createLocker(@Valid @RequestBody LockerRequest request) {
         try {

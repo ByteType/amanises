@@ -8,6 +8,8 @@ public class ParcelArriveResponse extends ParcelPayload {
 
     private Long id;
 
+    private ParcelStatus status;
+
     private String pickupCode;
 
     public ParcelArriveResponse(
@@ -23,13 +25,13 @@ public class ParcelArriveResponse extends ParcelPayload {
     ) {
         this.id = id;
         this.pickupCode = pickupCode;
+        this.status = status;
         this.setSender(sender);
         this.setRecipient(recipient);
         this.setWidth(width);
         this.setHeight(height);
         this.setDepth(depth);
         this.setMass(mass);
-        this.setStatus(status);
     }
 
     public Long getId() {
@@ -38,6 +40,14 @@ public class ParcelArriveResponse extends ParcelPayload {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public ParcelStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ParcelStatus status) {
+        this.status = status;
     }
 
     public String getPickupCode() {

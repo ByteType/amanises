@@ -63,9 +63,23 @@ public class LockerControllerTest {
     @Test
     public void testGetLocker() throws Exception {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername("Driver");
-        Locker locker = lockerRepository.findByLocation(DataSet.location[0]).orElseThrow();
+        Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[0]).orElseThrow();
 
         mockMvc.perform(get("/api/lockers/{id}", locker.getId())
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.location").value(DataSet.location[0]))
+                .andExpect(jsonPath("$.cabinets[0].id").isNumber())
+                .andExpect(jsonPath("$.cabinets[0].locked").isBoolean());
+    }
+
+    @Test
+    public void testGetLockerByLocation() throws Exception {
+        String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername("Driver");
+        Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[0]).orElseThrow();
+
+        mockMvc.perform(get("/api/lockers")
+                        .param("location", locker.getLocation())
                         .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.location").value(DataSet.location[0]))

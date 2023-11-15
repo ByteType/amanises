@@ -35,6 +35,18 @@ public class LockerService {
         );
     }
 
+    public LockerResponse getLockerStatusByLocation(String location) {
+        Locker locker = lockerRepository.findByLocationWithCabinets(location)
+                .orElseThrow(() -> new RuntimeException(String.format("Error: Not found locker with %s", location)));
+
+        return new LockerResponse(
+                locker.getLocation(),
+                locker.getCabinets().stream()
+                        .map(CabinetPayload::createFrom)
+                        .collect(Collectors.toList())
+        );
+    }
+
     public LockerResponse createLocker(LockerRequest request) {
         Locker locker = new Locker();
         locker.setLocation(request.getLocation());

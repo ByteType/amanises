@@ -1,5 +1,6 @@
 package com.bytetype.amanises.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -24,6 +25,7 @@ public class Cabinet {
         return id;
     }
 
+    @JsonBackReference
     public Locker getLocker() {
         return locker;
     }

@@ -12,6 +12,8 @@ public class ParcelDeliveryResponse extends ParcelPayload {
 
     private Long id;
 
+    private ParcelStatus status;
+
     private LocalDateTime readyForPickupAt;
 
     private String deliveryCode;
@@ -32,6 +34,7 @@ public class ParcelDeliveryResponse extends ParcelPayload {
             List<Locker> expectedLocker
     ) {
         this.id = id;
+        this.status = status;
         this.readyForPickupAt = readyForPickupAt;
         this.deliveryCode = deliveryCode;
         this.expectedLocker = expectedLocker;
@@ -41,7 +44,6 @@ public class ParcelDeliveryResponse extends ParcelPayload {
         this.setHeight(height);
         this.setDepth(depth);
         this.setMass(mass);
-        this.setStatus(status);
     }
 
     public Long getId() {
@@ -50,6 +52,14 @@ public class ParcelDeliveryResponse extends ParcelPayload {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public ParcelStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ParcelStatus status) {
+        this.status = status;
     }
 
     public LocalDateTime getReadyForPickupAt() {

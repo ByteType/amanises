@@ -43,8 +43,8 @@ public class Parcel {
 
     private String deliveryCode;
 
-    @OneToMany
-    private List<Locker> expectedLocker;
+    @OneToMany(mappedBy = "parcel")
+    private List<ParcelExpect> expectedLocker;
 
     public Long getId() {
         return id;
@@ -138,11 +138,11 @@ public class Parcel {
         this.deliveryCode = deliveryCode;
     }
 
-    public List<Locker> getExpectedLocker() {
+    public List<ParcelExpect> getExpectedLocker() {
         return expectedLocker;
     }
 
-    public void setExpectedLocker(List<Locker> expectedLocker) {
+    public void setExpectedLocker(List<ParcelExpect> expectedLocker) {
         this.expectedLocker = expectedLocker;
     }
 }
