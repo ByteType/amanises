@@ -12,6 +12,8 @@ public class UserInfoResponse {
 
     private List<String> roles;
 
+    private String token;
+
     public UserInfoResponse(Long id, String username, String email, List<String> roles) {
         this.id = id;
         this.username = username;
@@ -49,5 +51,13 @@ public class UserInfoResponse {
 
     public void setRoles(List<String> roles) {
         this.roles = roles;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

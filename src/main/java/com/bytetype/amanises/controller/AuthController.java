@@ -28,6 +28,7 @@ public class AuthController {
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             UserInfoResponse response = authService.authenticateUser(loginRequest);
+            response.setToken(jwtTokenProvider.generateTokenFromUsername(response.getUsername()));
             ResponseCookie jwtCookie = jwtTokenProvider.generateJwtCookie(response.getUsername());
 
             return ResponseEntity.ok()
@@ -43,6 +44,7 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         try {
             UserInfoResponse response = authService.registerUser(signUpRequest);
+            response.setToken(jwtTokenProvider.generateTokenFromUsername(response.getUsername()));
             ResponseCookie jwtCookie = jwtTokenProvider.generateJwtCookie(response.getUsername());
 
             return ResponseEntity.ok()
