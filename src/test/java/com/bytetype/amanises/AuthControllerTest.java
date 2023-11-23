@@ -49,14 +49,16 @@ public class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static class DataSet {
-        private static final String[] username = { "AuthControllerTestUser1", "AuthControllerTestUser2" };
+    private static final String className = AuthControllerTest.class.getSimpleName();
 
-        private static final String[] email = { "AuthControllerTestUser1@testDomain.com", "AuthControllerTestUser2@testDomain.com" };
+    private static class DataSet {
+        private static final String[] username = { className + "User1", className + "User2" };
+
+        private static final String[] email = { className + "User1@testDomain.com", className + "User2@testDomain.com" };
 
         private static final String[] password = { "testPassword1", "testPassword2" };
 
-        private static final String[] address = { "123 Main St, AuthControllerTestTown, NA", "456 Main St, AuthControllerTestTown, NA" };
+        private static final String[] address = { "123 Main St, " + className + "Town, NA", "456 Main St, " + className + "Town, NA" };
 
         private static final String[] role = { "user", "user" };
     }

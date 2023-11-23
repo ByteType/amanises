@@ -56,14 +56,16 @@ public class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static class DataSet {
-        private static final String[] username = { "UserControllerTestUser1", "UserControllerTestUser2" };
+    private static final String className = UserControllerTest.class.getSimpleName();
 
-        private static final String[] email = { "UserControllerTestUser1@testDomain.com", "UserControllerTestUser2@testDomain.com" };
+    private static class DataSet {
+        private static final String[] username = { className + "User1", className + "User2" };
+
+        private static final String[] email = { className + "User1@testDomain.com", className + "User2@testDomain.com" };
 
         private static final String[] password = { "testPassword1", "testPassword2" };
 
-        private static final String[] address = { "123 Main St, UserControllerTestTown, NA", "456 Main St, UserControllerTestTown, NA" };
+        private static final String[] address = { "123 Main St, " + className + "Town, NA", "456 Main St, " + className + "Town, NA" };
     }
 
     @BeforeAll

@@ -1,6 +1,6 @@
 package com.bytetype.amanises.controller;
 
-import com.bytetype.amanises.payload.common.ParcelPayload;
+import com.bytetype.amanises.model.Parcel;
 import com.bytetype.amanises.payload.request.ParcelArriveRequest;
 import com.bytetype.amanises.payload.request.ParcelDeliveryRequest;
 import com.bytetype.amanises.payload.request.ParcelPickUpRequest;
@@ -23,7 +23,7 @@ public class ParcelController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getParcelById(@PathVariable(value = "id") Long id) {
         try {
-            ParcelPayload response = parcelService.getParcelById(id);
+            Parcel response = parcelService.getParcelById(id);
 
             return ResponseEntity.ok()
                     .body(response);

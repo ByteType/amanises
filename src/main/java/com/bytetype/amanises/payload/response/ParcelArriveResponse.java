@@ -1,10 +1,10 @@
 package com.bytetype.amanises.payload.response;
 
 import com.bytetype.amanises.model.ParcelStatus;
-import com.bytetype.amanises.payload.common.ParcelPayload;
+import com.bytetype.amanises.payload.common.ParcelDetailPayload;
 import com.bytetype.amanises.payload.common.UserPayload;
 
-public class ParcelArriveResponse extends ParcelPayload {
+public class ParcelArriveResponse extends ParcelDetailPayload {
 
     private Long id;
 

@@ -1,11 +1,11 @@
 package com.bytetype.amanises.payload.request;
 
-import com.bytetype.amanises.payload.common.ParcelPayload;
+import com.bytetype.amanises.payload.common.ParcelDetailPayload;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ParcelDeliveryRequest extends ParcelPayload {
+public class ParcelDeliveryRequest extends ParcelDetailPayload {
 
     private LocalDateTime readyForPickupAt; // Expected arrive time.
 

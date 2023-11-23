@@ -2,7 +2,6 @@ package com.bytetype.amanises.service;
 
 import com.bytetype.amanises.exception.*;
 import com.bytetype.amanises.model.*;
-import com.bytetype.amanises.payload.common.ParcelPayload;
 import com.bytetype.amanises.payload.common.UserPayload;
 import com.bytetype.amanises.payload.request.ParcelArriveRequest;
 import com.bytetype.amanises.payload.request.ParcelDeliveryRequest;
@@ -42,10 +41,10 @@ public class ParcelService {
     @Autowired
     private UserService userService;
 
-    public ParcelPayload getParcelById(Long id) throws ParcelNotFoundException {
+    public Parcel getParcelById(Long id) throws ParcelNotFoundException {
         Parcel parcel = parcelRepository.findById(id).orElseThrow(ParcelNotFoundException::new);
 
-        return ParcelPayload.createFrom(parcel);
+        return parcel;
     }
 
     public ParcelDeliveryResponse deliveryParcel(ParcelDeliveryRequest request) throws InvalidSenderException, InvalidRecipientException, RoleNotFoundException, InvalidLockerException {

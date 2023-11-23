@@ -1,12 +1,12 @@
 package com.bytetype.amanises.payload.response;
 
 import com.bytetype.amanises.model.ParcelStatus;
-import com.bytetype.amanises.payload.common.ParcelPayload;
+import com.bytetype.amanises.payload.common.ParcelDetailPayload;
 import com.bytetype.amanises.payload.common.UserPayload;
 
 import java.time.LocalDateTime;
 
-public class ParcelPickUpResponse extends ParcelPayload {
+public class ParcelPickUpResponse extends ParcelDetailPayload {
 
     private Long id;
 
