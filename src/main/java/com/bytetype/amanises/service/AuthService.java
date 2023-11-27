@@ -3,6 +3,7 @@ package com.bytetype.amanises.service;
 import com.bytetype.amanises.exception.NameExistException;
 import com.bytetype.amanises.exception.RoleNotFoundException;
 import com.bytetype.amanises.exception.UserExistException;
+import com.bytetype.amanises.exception.UserNotFoundException;
 import com.bytetype.amanises.model.Role;
 import com.bytetype.amanises.model.RoleType;
 import com.bytetype.amanises.model.User;
@@ -56,7 +57,7 @@ public class AuthService {
      * username, email, and roles.
      * @throws AuthenticationException if authentication fails due to invalid credentials or other authentication-related issues.
      */
-    public UserInfoResponse authenticateUser(LoginRequest request) {
+    public UserInfoResponse authenticateUser(LoginRequest request) throws UserNotFoundException {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -64,6 +65,9 @@ public class AuthService {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
+
+        if (roles.contains(RoleType.ROLE_GUEST.toString()))
+            throw new UserNotFoundException();
 
         return new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles);
     }
