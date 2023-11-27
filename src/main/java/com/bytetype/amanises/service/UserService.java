@@ -77,7 +77,7 @@ public class UserService {
             if (user != null) return user;
         }
         if (request.getUsername() != null) {
-            User user = userRepository.findById(request.getId()).orElse(null);
+            User user = userRepository.findByUsername(request.getUsername()).orElse(null);
             if (user != null) return user;
         }
         if (request.getAddress() != null) {

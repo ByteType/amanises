@@ -66,12 +66,15 @@ public class ParcelService {
         parcel.setDeliveryCode(generateCode(6));
 
         List<ParcelExpect> parcelExpects = new ArrayList<>();
-        for (Long lockerId : request.getExpectedLockerId()) {
-            Locker locker = lockerRepository.findById(lockerId).orElseThrow(InvalidLockerException::new);
-            ParcelExpect parcelExpect = new ParcelExpect();
-            parcelExpect.setLocker(locker);
-            parcelExpect.setParcel(parcel);
-            parcelExpects.add(parcelExpect);
+        List<Long> expectedLockerId = request.getExpectedLockerId();
+        if (expectedLockerId != null) {
+            for (Long lockerId : expectedLockerId) {
+                Locker locker = lockerRepository.findById(lockerId).orElseThrow(InvalidLockerException::new);
+                ParcelExpect parcelExpect = new ParcelExpect();
+                parcelExpect.setLocker(locker);
+                parcelExpect.setParcel(parcel);
+                parcelExpects.add(parcelExpect);
+            }
         }
 
         parcel = parcelRepository.save(parcel);
