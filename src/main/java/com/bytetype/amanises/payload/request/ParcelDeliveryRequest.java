@@ -5,25 +5,25 @@ import com.bytetype.amanises.payload.common.ParcelDetailPayload;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ParcelDeliveryRequest extends ParcelDetailPayload {
+public class ParcelDeliveryRequest {
 
-    private LocalDateTime readyForPickupAt; // Expected arrive time.
+    private Long id;
 
-    private List<Long> expectedLockerId;
+    private String deliveryCode;
 
-    public LocalDateTime getReadyForPickupAt() {
-        return readyForPickupAt;
+    public Long getId() {
+        return id;
     }
 
-    public void setReadyForPickupAt(LocalDateTime readyForPickupAt) {
-        this.readyForPickupAt = readyForPickupAt;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public List<Long> getExpectedLockerId() {
-        return expectedLockerId;
+    public String getDeliveryCode() {
+        return deliveryCode;
     }
 
-    public void setExpectedLockerId(List<Long> expectedLockerId) {
-        this.expectedLockerId = expectedLockerId;
+    public void setDeliveryCode(String deliveryCode) {
+        this.deliveryCode = deliveryCode;
     }
 }

@@ -4,6 +4,7 @@ import com.bytetype.amanises.exception.RoleNotFoundException;
 import com.bytetype.amanises.model.*;
 import com.bytetype.amanises.payload.common.UserPayload;
 import com.bytetype.amanises.payload.request.ParcelArriveRequest;
+import com.bytetype.amanises.payload.request.ParcelCreateRequest;
 import com.bytetype.amanises.payload.request.ParcelDeliveryRequest;
 import com.bytetype.amanises.payload.request.ParcelPickUpRequest;
 import com.bytetype.amanises.repository.*;
@@ -101,22 +102,61 @@ public class ParcelControllerTest {
     }
 
     @Test
-    public void testDeliveryParcel() throws Exception {
+    public void testCreateParcel() throws Exception {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
         User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
         Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[0]).orElseThrow();
         Random random = new Random();
 
+        ParcelCreateRequest createRequest = new ParcelCreateRequest();
+        createRequest.setSender(UserPayload.createFrom(sender));
+        createRequest.setRecipient(UserPayload.createFrom(recipient));
+        createRequest.setWidth(random.nextDouble() * 10.0);
+        createRequest.setHeight(random.nextDouble() * 5.0);
+        createRequest.setDepth(random.nextDouble() * 2.0);
+        createRequest.setMass(random.nextDouble() * 1.5);
+        createRequest.setReadyForPickupAt(LocalDateTime.now());
+        createRequest.setExpectedSenderLockers(List.of(locker.getId()));
+        createRequest.setExpectedRecipientLockers(List.of(locker.getId()));
+
+        String body = objectMapper.writeValueAsString(createRequest);
+
+        mockMvc.perform(post("/api/parcels")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(ParcelStatus.CREATE.name()))
+                .andExpect(jsonPath("$.deliveryCode").isString());
+    }
+
+    @Test
+    public void testDeliveryParcel() throws Exception {
+        String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
+        User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
+        User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
+        Cabinet cabinet = cabinetRepository.findAll().get(1);
+        Random random = new Random();
+
+        Parcel parcel = new Parcel();
+        parcel.setSender(sender);
+        parcel.setRecipient(recipient);
+        parcel.setWidth(random.nextDouble() * 10.0);
+        parcel.setHeight(random.nextDouble() * 5.0);
+        parcel.setDepth(random.nextDouble() * 2.0);
+        parcel.setMass(random.nextDouble() * 1.5);
+        parcel.setReadyForPickupAt(LocalDateTime.now());
+        parcel.setDeliveryCode(generateCode(4));
+        parcel = parcelRepository.saveAndFlush(parcel);
+
+        cabinet.setParcel(parcel);
+        cabinet = cabinetRepository.saveAndFlush(cabinet);
+
         ParcelDeliveryRequest deliveryRequest = new ParcelDeliveryRequest();
-        deliveryRequest.setSender(UserPayload.createFrom(sender));
-        deliveryRequest.setRecipient(UserPayload.createFrom(recipient));
-        deliveryRequest.setWidth(random.nextDouble() * 10.0);
-        deliveryRequest.setHeight(random.nextDouble() * 5.0);
-        deliveryRequest.setDepth(random.nextDouble() * 2.0);
-        deliveryRequest.setMass(random.nextDouble() * 1.5);
-        deliveryRequest.setReadyForPickupAt(LocalDateTime.now());
-        deliveryRequest.setExpectedLockerId(List.of(locker.getId()));
+        deliveryRequest.setId(cabinet.getId());
+        deliveryRequest.setDeliveryCode(parcel.getDeliveryCode());
 
         String body = objectMapper.writeValueAsString(deliveryRequest);
 
@@ -126,7 +166,7 @@ public class ParcelControllerTest {
                         .content(body))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.deliveryCode").isString());
+                .andExpect(jsonPath("$.status").value(ParcelStatus.DELIVERED.name()));
     }
 
     @Test
@@ -134,7 +174,7 @@ public class ParcelControllerTest {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
         User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
-        Cabinet cabinet = cabinetRepository.findAll().get(0);
+        Cabinet cabinet = cabinetRepository.findAll().get(1);
         Random random = new Random();
 
         Parcel parcel = new Parcel();
@@ -169,7 +209,7 @@ public class ParcelControllerTest {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
         User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
-        Cabinet cabinet = cabinetRepository.findAll().get(1);
+        Cabinet cabinet = cabinetRepository.findAll().get(2);
         Random random = new Random();
 
         String code = generateCode(4);
@@ -185,8 +225,8 @@ public class ParcelControllerTest {
         parcel.setPickupCode(code);
         parcel = parcelRepository.saveAndFlush(parcel);
 
-        cabinet.setLocked(true);
         cabinet.setParcel(parcel);
+        cabinet.setType(CabinetType.PICKUP_PARCEL_EXIST);
         cabinet = cabinetRepository.save(cabinet);
 
         ParcelPickUpRequest pickUpRequest = new ParcelPickUpRequest();
@@ -202,6 +242,6 @@ public class ParcelControllerTest {
                         .content(body))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value("PICKED_UP"));
+                .andExpect(jsonPath("$.status").value(ParcelStatus.PICKED_UP.name()));
     }
 }

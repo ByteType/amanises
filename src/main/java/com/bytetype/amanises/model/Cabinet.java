@@ -19,7 +19,7 @@ public class Cabinet {
     @JoinColumn(name = "parcel_id")
     private Parcel parcel;
 
-    private Boolean isLocked = false;
+    private CabinetType type = CabinetType.OPEN;
 
     public Long getId() {
         return id;
@@ -42,11 +42,11 @@ public class Cabinet {
         this.parcel = parcel;
     }
 
-    public Boolean getLocked() {
-        return isLocked;
+    public CabinetType getType() {
+        return type;
     }
 
-    public void setLocked(Boolean locked) {
-        isLocked = locked;
+    public void setType(CabinetType type) {
+        this.type = type;
     }
 }

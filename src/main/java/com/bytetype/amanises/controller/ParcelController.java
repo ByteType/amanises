@@ -2,12 +2,10 @@ package com.bytetype.amanises.controller;
 
 import com.bytetype.amanises.model.Parcel;
 import com.bytetype.amanises.payload.request.ParcelArriveRequest;
+import com.bytetype.amanises.payload.request.ParcelCreateRequest;
 import com.bytetype.amanises.payload.request.ParcelDeliveryRequest;
 import com.bytetype.amanises.payload.request.ParcelPickUpRequest;
-import com.bytetype.amanises.payload.response.MessageResponse;
-import com.bytetype.amanises.payload.response.ParcelArriveResponse;
-import com.bytetype.amanises.payload.response.ParcelDeliveryResponse;
-import com.bytetype.amanises.payload.response.ParcelPickUpResponse;
+import com.bytetype.amanises.payload.response.*;
 import com.bytetype.amanises.service.ParcelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +23,19 @@ public class ParcelController {
     public ResponseEntity<?> getParcelById(@PathVariable(value = "id") Long id) {
         try {
             Parcel response = parcelService.getParcelById(id);
+
+            return ResponseEntity.ok()
+                    .body(response);
+        } catch (Exception exception) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(exception.getMessage()));
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createParcel(@RequestBody ParcelCreateRequest request) {
+        try {
+            ParcelCreateResponse response = parcelService.createParcel(request);
 
             return ResponseEntity.ok()
                     .body(response);

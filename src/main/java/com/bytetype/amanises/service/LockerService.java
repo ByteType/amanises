@@ -1,6 +1,7 @@
 package com.bytetype.amanises.service;
 
 import com.bytetype.amanises.model.Cabinet;
+import com.bytetype.amanises.model.CabinetType;
 import com.bytetype.amanises.model.Locker;
 import com.bytetype.amanises.payload.common.CabinetPayload;
 import com.bytetype.amanises.payload.request.LockerRequest;
@@ -56,7 +57,7 @@ public class LockerService {
         for (int i = 0; i < request.getSize(); i++) {
             Cabinet cabinet = new Cabinet();
             cabinet.setLocker(locker);
-            cabinet.setLocked(false);
+            cabinet.setType(CabinetType.OPEN);
             cabinets.add(cabinet);
         }
 

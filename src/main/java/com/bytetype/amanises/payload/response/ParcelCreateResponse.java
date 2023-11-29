@@ -8,13 +8,17 @@ import com.bytetype.amanises.payload.common.UserPayload;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ParcelDeliveryResponse extends ParcelDetailPayload {
+public class ParcelCreateResponse extends ParcelDetailPayload {
 
     private Long id;
 
     private ParcelStatus status;
 
-    public ParcelDeliveryResponse(
+    private LocalDateTime readyForPickupAt;
+
+    private String deliveryCode;
+
+    public ParcelCreateResponse(
             Long id,
             UserPayload sender,
             UserPayload recipient,
@@ -22,10 +26,14 @@ public class ParcelDeliveryResponse extends ParcelDetailPayload {
             Double height,
             Double depth,
             Double mass,
-            ParcelStatus status
+            ParcelStatus status,
+            LocalDateTime readyForPickupAt,
+            String deliveryCode
     ) {
         this.id = id;
         this.status = status;
+        this.readyForPickupAt = readyForPickupAt;
+        this.deliveryCode = deliveryCode;
         this.setSender(sender);
         this.setRecipient(recipient);
         this.setWidth(width);
@@ -48,5 +56,21 @@ public class ParcelDeliveryResponse extends ParcelDetailPayload {
 
     public void setStatus(ParcelStatus status) {
         this.status = status;
+    }
+
+    public LocalDateTime getReadyForPickupAt() {
+        return readyForPickupAt;
+    }
+
+    public void setReadyForPickupAt(LocalDateTime readyForPickupAt) {
+        this.readyForPickupAt = readyForPickupAt;
+    }
+
+    public String getDeliveryCode() {
+        return deliveryCode;
+    }
+
+    public void setDeliveryCode(String deliveryCode) {
+        this.deliveryCode = deliveryCode;
     }
 }

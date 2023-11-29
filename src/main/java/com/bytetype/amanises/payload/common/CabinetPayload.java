@@ -1,12 +1,13 @@
 package com.bytetype.amanises.payload.common;
 
 import com.bytetype.amanises.model.Cabinet;
+import com.bytetype.amanises.model.CabinetType;
 
 public class CabinetPayload {
 
     private Long id;
 
-    private Boolean isLocked;
+    private CabinetType type;
 
     public Long getId() {
         return id;
@@ -16,18 +17,18 @@ public class CabinetPayload {
         this.id = id;
     }
 
-    public Boolean getLocked() {
-        return isLocked;
+    public CabinetType getType() {
+        return type;
     }
 
-    public void setLocked(Boolean locked) {
-        isLocked = locked;
+    public void setType(CabinetType type) {
+        this.type = type;
     }
 
     public static CabinetPayload createFrom(Cabinet cabinet) {
         CabinetPayload payload = new CabinetPayload();
         payload.setId(cabinet.getId());
-        payload.setLocked(cabinet.getLocked());
+        payload.setType(cabinet.getType());
 
         return payload;
     }

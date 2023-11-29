@@ -1,6 +1,7 @@
 package com.bytetype.amanises.utility;
 
 import com.bytetype.amanises.model.Cabinet;
+import com.bytetype.amanises.model.CabinetType;
 import com.bytetype.amanises.model.Locker;
 
 import java.util.ArrayList;
@@ -18,10 +19,10 @@ public class LockerUtilities {
         for (String location : locations) {
             Locker locker = new Locker();
             locker.setLocation(location);
-            for (int i = 0; i < random.nextInt(5); i++) {
+            for (int i = 0; i < random.nextInt(5, 10); i++) {
                 Cabinet cabinet = new Cabinet();
                 cabinet.setLocker(locker);
-                cabinet.setLocked(false);
+                cabinet.setType(CabinetType.OPEN);
                 cabinets.add(cabinet);
             }
             lockers.add(locker);

@@ -1,6 +1,7 @@
 package com.bytetype.amanises;
 
 import com.bytetype.amanises.model.Cabinet;
+import com.bytetype.amanises.model.CabinetType;
 import com.bytetype.amanises.model.Locker;
 import com.bytetype.amanises.payload.request.LockerRequest;
 import com.bytetype.amanises.repository.CabinetRepository;
@@ -54,8 +55,8 @@ public class LockerControllerTest {
         lockerRepository.saveAndFlush(locker);
 
         Cabinet cabinet = new Cabinet();
-        cabinet.setLocked(true);
         cabinet.setLocker(locker);
+        cabinet.setType(CabinetType.DELIVERY_PARCEL_EXIST);
 
         cabinetRepository.saveAndFlush(cabinet);
     }
@@ -70,7 +71,7 @@ public class LockerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.location").value(DataSet.location[0]))
                 .andExpect(jsonPath("$.cabinets[0].id").isNumber())
-                .andExpect(jsonPath("$.cabinets[0].locked").isBoolean());
+                .andExpect(jsonPath("$.cabinets[0].type").value(CabinetType.DELIVERY_PARCEL_EXIST.name()));
     }
 
     @Test
@@ -84,7 +85,7 @@ public class LockerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.location").value(DataSet.location[0]))
                 .andExpect(jsonPath("$.cabinets[0].id").isNumber())
-                .andExpect(jsonPath("$.cabinets[0].locked").isBoolean());
+                .andExpect(jsonPath("$.cabinets[0].type").value(CabinetType.DELIVERY_PARCEL_EXIST.name()));
     }
 
     @Test
