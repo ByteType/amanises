@@ -41,9 +41,9 @@ public class ParcelService {
     @Autowired
     private UserService userService;
 
-    public ParcelDetailResponse getParcelById(Long id) throws ParcelNotFoundException, CabinetNotFoundException {
+    public ParcelDetailResponse getParcelById(Long id) throws ParcelNotFoundException {
         Parcel parcel = parcelRepository.findById(id).orElseThrow(ParcelNotFoundException::new);
-        Cabinet cabinet = cabinetRepository.findByParcelId(id).orElseThrow(CabinetNotFoundException::new);
+        Cabinet cabinet = cabinetRepository.findByParcelId(id).orElse(null);
 
         return new ParcelDetailResponse(
                 parcel.getId(),
@@ -58,8 +58,8 @@ public class ParcelService {
                 parcel.getPickedUpAt(),
                 parcel.getPickupCode(),
                 parcel.getDeliveryCode(),
-                cabinet.getLocker().getLocation(),
-                CabinetPayload.createFrom(cabinet)
+                cabinet != null ? cabinet.getLocker().getLocation() : null,
+                cabinet != null ? CabinetPayload.createFrom(cabinet) : null
         );
     }
 
