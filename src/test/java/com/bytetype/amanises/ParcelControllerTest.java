@@ -171,7 +171,7 @@ public class ParcelControllerTest {
 
     @Test
     public void testArriveParcel() throws Exception {
-        String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
+        String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername("Driver");
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
         User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
         Cabinet cabinet = cabinetRepository.findAll().get(1);

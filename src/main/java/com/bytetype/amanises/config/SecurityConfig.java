@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
                                 .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/parcels/**").permitAll()
                                 .requestMatchers("/api/user/**").hasRole("USER")
                                 .anyRequest().authenticated()
                 );

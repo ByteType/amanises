@@ -159,6 +159,8 @@ public class AuthService {
             user.setPassword(null);
             user.setRoles(roles);
 
+            userRepository.save(user);
+
             return true;
         } else {
             return false;

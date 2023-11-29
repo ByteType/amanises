@@ -9,6 +9,7 @@ import com.bytetype.amanises.payload.response.*;
 import com.bytetype.amanises.service.ParcelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -33,6 +34,7 @@ public class ParcelController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> createParcel(@RequestBody ParcelCreateRequest request) {
         try {
             ParcelCreateResponse response = parcelService.createParcel(request);
@@ -59,6 +61,7 @@ public class ParcelController {
     }
 
     @PostMapping("/arrive")
+    @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<?> arriveParcel(@RequestBody ParcelArriveRequest request) {
         try {
             ParcelArriveResponse response = parcelService.arriveParcel(request);
@@ -84,6 +87,7 @@ public class ParcelController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('DRIVER')")
     public ResponseEntity<?> deleteParcel(@PathVariable(value = "id") Long id) {
         parcelService.deleteParcel(id);
 

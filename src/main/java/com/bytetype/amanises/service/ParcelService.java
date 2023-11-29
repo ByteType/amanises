@@ -115,7 +115,7 @@ public class ParcelService {
         Parcel parcel = cabinet.getParcel();
 
         if (!cabinet.getParcel().getDeliveryCode().equals(request.getDeliveryCode()))
-            throw new Exception("DeliveryCode incorrect");
+            throw new InvalidDeliveryCodeException();
 
         parcel.setStatus(ParcelStatus.DELIVERED);
         parcelRepository.save(parcel);
@@ -169,7 +169,7 @@ public class ParcelService {
         Parcel parcel = cabinet.getParcel();
 
         if (!cabinet.getParcel().getPickupCode().equals(request.getPickupCode()))
-            throw new Exception("PickupCode incorrect");
+            throw new InvalidPickupCodeException();
 
         parcel.setStatus(ParcelStatus.PICKED_UP);
         parcel.setPickedUpAt(request.getPickedUpAt());
