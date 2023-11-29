@@ -2,15 +2,13 @@ package com.bytetype.amanises.service;
 
 import com.bytetype.amanises.exception.*;
 import com.bytetype.amanises.model.*;
+import com.bytetype.amanises.payload.common.CabinetPayload;
 import com.bytetype.amanises.payload.common.UserPayload;
 import com.bytetype.amanises.payload.request.ParcelArriveRequest;
 import com.bytetype.amanises.payload.request.ParcelCreateRequest;
 import com.bytetype.amanises.payload.request.ParcelDeliveryRequest;
 import com.bytetype.amanises.payload.request.ParcelPickUpRequest;
-import com.bytetype.amanises.payload.response.ParcelArriveResponse;
-import com.bytetype.amanises.payload.response.ParcelCreateResponse;
-import com.bytetype.amanises.payload.response.ParcelDeliveryResponse;
-import com.bytetype.amanises.payload.response.ParcelPickUpResponse;
+import com.bytetype.amanises.payload.response.*;
 import com.bytetype.amanises.repository.CabinetRepository;
 import com.bytetype.amanises.repository.LockerRepository;
 import com.bytetype.amanises.repository.ParcelExpectRepository;
@@ -43,8 +41,26 @@ public class ParcelService {
     @Autowired
     private UserService userService;
 
-    public Parcel getParcelById(Long id) throws ParcelNotFoundException {
-        return parcelRepository.findById(id).orElseThrow(ParcelNotFoundException::new);
+    public ParcelDetailResponse getParcelById(Long id) throws ParcelNotFoundException, CabinetNotFoundException {
+        Parcel parcel = parcelRepository.findById(id).orElseThrow(ParcelNotFoundException::new);
+        Cabinet cabinet = cabinetRepository.findByParcelId(id).orElseThrow(CabinetNotFoundException::new);
+
+        return new ParcelDetailResponse(
+                parcel.getId(),
+                UserPayload.createFrom(parcel.getSender()),
+                UserPayload.createFrom(parcel.getRecipient()),
+                parcel.getWidth(),
+                parcel.getHeight(),
+                parcel.getDepth(),
+                parcel.getMass(),
+                parcel.getStatus(),
+                parcel.getReadyForPickupAt(),
+                parcel.getPickedUpAt(),
+                parcel.getPickupCode(),
+                parcel.getDeliveryCode(),
+                cabinet.getLocker().getLocation(),
+                CabinetPayload.createFrom(cabinet)
+        );
     }
 
     public ParcelCreateResponse createParcel(ParcelCreateRequest request) throws RoleNotFoundException, InvalidSenderException, InvalidRecipientException, InvalidLockerException {

@@ -22,13 +22,13 @@ public class UserDetailResponse extends UserPayload {
             Set<Role> roles,
             List<ParcelPayload> parcels
     ) {
+        this.roles = roles;
+        this.parcels = parcels;
         setId(id);
         setUsername(username);
         setEmail(email);
         setPhone(phone);
         setAddress(address);
-        this.roles = roles;
-        this.parcels = parcels;
     }
 
     public Set<Role> getRoles() {

@@ -31,6 +31,8 @@ import java.util.Random;
 
 import static com.bytetype.amanises.utility.ParcelUtilities.generateCode;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -102,6 +104,37 @@ public class ParcelControllerTest {
     }
 
     @Test
+    public void testGetParcel() throws Exception {
+        String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
+        User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
+        User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
+        Cabinet cabinet = cabinetRepository.findAll().get(1);
+        Random random = new Random();
+
+        Parcel parcel = new Parcel();
+        parcel.setSender(sender);
+        parcel.setRecipient(recipient);
+        parcel.setWidth(random.nextDouble() * 10.0);
+        parcel.setHeight(random.nextDouble() * 5.0);
+        parcel.setDepth(random.nextDouble() * 2.0);
+        parcel.setMass(random.nextDouble() * 1.5);
+        parcel.setReadyForPickupAt(LocalDateTime.now());
+        parcel.setDeliveryCode(generateCode(4));
+        parcel = parcelRepository.saveAndFlush(parcel);
+
+        cabinet.setParcel(parcel);
+        cabinetRepository.saveAndFlush(cabinet);
+
+        mockMvc.perform(get("/api/parcels/{id}", parcel.getId())
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(ParcelStatus.CREATE.name()))
+                .andExpect(jsonPath("$.location").isString());
+    }
+
+    @Test
     public void testCreateParcel() throws Exception {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
@@ -128,7 +161,6 @@ public class ParcelControllerTest {
                         .content(body))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(ParcelStatus.CREATE.name()))
                 .andExpect(jsonPath("$.deliveryCode").isString());
     }
 

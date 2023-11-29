@@ -23,7 +23,7 @@ public class ParcelController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getParcelById(@PathVariable(value = "id") Long id) {
         try {
-            Parcel response = parcelService.getParcelById(id);
+            ParcelDetailResponse response = parcelService.getParcelById(id);
 
             return ResponseEntity.ok()
                     .body(response);
