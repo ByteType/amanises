@@ -30,9 +30,8 @@ import java.util.List;
 import java.util.Random;
 
 import static com.bytetype.amanises.utility.ParcelUtilities.generateCode;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -118,6 +117,7 @@ public class ParcelControllerTest {
         parcel.setHeight(random.nextDouble() * 5.0);
         parcel.setDepth(random.nextDouble() * 2.0);
         parcel.setMass(random.nextDouble() * 1.5);
+        parcel.setStatus(ParcelStatus.CREATE);
         parcel.setReadyForPickupAt(LocalDateTime.now());
         parcel.setDeliveryCode(generateCode(4));
         parcel = parcelRepository.saveAndFlush(parcel);

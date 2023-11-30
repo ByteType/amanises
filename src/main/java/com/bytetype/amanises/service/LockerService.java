@@ -4,6 +4,7 @@ import com.bytetype.amanises.model.Cabinet;
 import com.bytetype.amanises.model.CabinetType;
 import com.bytetype.amanises.model.Locker;
 import com.bytetype.amanises.payload.common.CabinetPayload;
+import com.bytetype.amanises.payload.common.LockerPayload;
 import com.bytetype.amanises.payload.request.LockerRequest;
 import com.bytetype.amanises.payload.response.LockerResponse;
 import com.bytetype.amanises.repository.CabinetRepository;
@@ -23,6 +24,14 @@ public class LockerService {
 
     @Autowired
     private CabinetRepository cabinetRepository;
+
+    public List<LockerPayload> getAllLocker() {
+        List<Locker> lockers = lockerRepository.findAll();
+
+        return lockers.stream()
+                .map(LockerPayload::createFrom)
+                .collect(Collectors.toList());
+    }
 
     public LockerResponse getLockerStatusById(Long id) {
         Locker locker = lockerRepository.findByIdWithCabinets(id)

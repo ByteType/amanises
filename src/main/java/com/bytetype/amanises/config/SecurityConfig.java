@@ -39,6 +39,7 @@ public class SecurityConfig {
                         authorizeHttpRequests
                                 .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/parcels/**").permitAll()
+                                .requestMatchers("/api/lockers/**").permitAll()
                                 .requestMatchers("/api/user/**").hasRole("USER")
                                 .anyRequest().authenticated()
                 );

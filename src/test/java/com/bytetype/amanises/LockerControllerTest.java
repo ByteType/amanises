@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -62,12 +63,17 @@ public class LockerControllerTest {
     }
 
     @Test
+    public void testGetAllLocker() throws Exception {
+        mockMvc.perform(get("/api/lockers/all"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
     public void testGetLocker() throws Exception {
-        String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername("Driver");
         Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[0]).orElseThrow();
 
-        mockMvc.perform(get("/api/lockers/{id}", locker.getId())
-                        .header("Authorization", token))
+        mockMvc.perform(get("/api/lockers/{id}", locker.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.location").value(DataSet.location[0]))
                 .andExpect(jsonPath("$.cabinets[0].id").isNumber())
@@ -76,12 +82,10 @@ public class LockerControllerTest {
 
     @Test
     public void testGetLockerByLocation() throws Exception {
-        String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername("Driver");
         Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[0]).orElseThrow();
 
         mockMvc.perform(get("/api/lockers")
-                        .param("location", locker.getLocation())
-                        .header("Authorization", token))
+                        .param("location", locker.getLocation()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.location").value(DataSet.location[0]))
                 .andExpect(jsonPath("$.cabinets[0].id").isNumber())

@@ -1,6 +1,5 @@
 package com.bytetype.amanises.controller;
 
-import com.bytetype.amanises.model.Parcel;
 import com.bytetype.amanises.payload.request.ParcelArriveRequest;
 import com.bytetype.amanises.payload.request.ParcelCreateRequest;
 import com.bytetype.amanises.payload.request.ParcelDeliveryRequest;
