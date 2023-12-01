@@ -12,6 +12,12 @@ public interface CabinetRepository extends JpaRepository<Cabinet, Long>  {
 
     Optional<Cabinet> findByParcelId(Long parcelId);
 
+    @Query("SELECT c FROM Parcel p JOIN Cabinet c ON p.id = c.parcel.id WHERE p.deliveryCode = :deliveryCode")
+    Optional<Cabinet> findByDeliveryCode(String deliveryCode);
+
+    @Query("SELECT c FROM Parcel p JOIN Cabinet c ON p.id = c.parcel.id WHERE p.pickupCode = :pickupCode")
+    Optional<Cabinet> findByPickupCode(String pickupCode);
+
     @Query("SELECT COUNT(c) > 0 FROM Cabinet c WHERE c.locker.id = :lockerId AND c.type = com.bytetype.amanises.model.CabinetType.OPEN")
     boolean existsEmptyCabinetsByLockerId(@Param("lockerId") Long lockerId);
 

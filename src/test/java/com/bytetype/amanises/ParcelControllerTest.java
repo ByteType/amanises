@@ -107,7 +107,7 @@ public class ParcelControllerTest {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
         User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
-        Cabinet cabinet = cabinetRepository.findAll().get(1);
+        Cabinet cabinet = cabinetRepository.findAll().get(0);
         Random random = new Random();
 
         Parcel parcel = new Parcel();
@@ -169,7 +169,8 @@ public class ParcelControllerTest {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
         User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
-        Cabinet cabinet = cabinetRepository.findAll().get(1);
+        Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[0]).orElseThrow();
+        Cabinet cabinet = locker.getCabinets().get(0);
         Random random = new Random();
 
         Parcel parcel = new Parcel();
@@ -184,10 +185,10 @@ public class ParcelControllerTest {
         parcel = parcelRepository.saveAndFlush(parcel);
 
         cabinet.setParcel(parcel);
-        cabinet = cabinetRepository.saveAndFlush(cabinet);
+        cabinetRepository.saveAndFlush(cabinet);
 
         ParcelDeliveryRequest deliveryRequest = new ParcelDeliveryRequest();
-        deliveryRequest.setId(cabinet.getId());
+        deliveryRequest.setLockerId(locker.getId());
         deliveryRequest.setDeliveryCode(parcel.getDeliveryCode());
 
         String body = objectMapper.writeValueAsString(deliveryRequest);
@@ -241,7 +242,8 @@ public class ParcelControllerTest {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
         User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
-        Cabinet cabinet = cabinetRepository.findAll().get(2);
+        Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[0]).orElseThrow();
+        Cabinet cabinet = locker.getCabinets().get(0);
         Random random = new Random();
 
         String code = generateCode(4);
@@ -259,10 +261,10 @@ public class ParcelControllerTest {
 
         cabinet.setParcel(parcel);
         cabinet.setType(CabinetType.PICKUP_PARCEL_EXIST);
-        cabinet = cabinetRepository.save(cabinet);
+        cabinetRepository.save(cabinet);
 
         ParcelPickUpRequest pickUpRequest = new ParcelPickUpRequest();
-        pickUpRequest.setId(cabinet.getId());
+        pickUpRequest.setLockerId(locker.getId());
         pickUpRequest.setPickedUpAt(LocalDateTime.now());
         pickUpRequest.setPickupCode(code);
 

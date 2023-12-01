@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ParcelService {
@@ -127,10 +126,14 @@ public class ParcelService {
     }
 
     public ParcelDeliveryResponse deliveryParcel(ParcelDeliveryRequest request) throws Exception {
-        Cabinet cabinet = cabinetRepository.findByParcelId(request.getId()).orElseThrow(CabinetNotFoundException::new);
+        Cabinet cabinet = cabinetRepository.findByDeliveryCode(request.getDeliveryCode()).orElseThrow(InvalidDeliveryCodeException::new);
+        Locker locker = cabinet.getLocker();
         Parcel parcel = cabinet.getParcel();
 
-        if (!cabinet.getParcel().getDeliveryCode().equals(request.getDeliveryCode()))
+        if (!locker.getId().equals(request.getLockerId()))
+            throw new IncorrectLockerException(locker.getLocation());
+
+        if (!parcel.getDeliveryCode().equals(request.getDeliveryCode()))
             throw new InvalidDeliveryCodeException();
 
         parcel.setStatus(ParcelStatus.DELIVERED);
@@ -181,10 +184,14 @@ public class ParcelService {
     }
 
     public ParcelPickUpResponse pickUpParcel(ParcelPickUpRequest request) throws Exception {
-        Cabinet cabinet = cabinetRepository.findByParcelId(request.getId()).orElseThrow(CabinetNotFoundException::new);
+        Cabinet cabinet = cabinetRepository.findByPickupCode(request.getPickupCode()).orElseThrow(InvalidPickupCodeException::new);
+        Locker locker = cabinet.getLocker();
         Parcel parcel = cabinet.getParcel();
 
-        if (!cabinet.getParcel().getPickupCode().equals(request.getPickupCode()))
+        if (!locker.getId().equals(request.getLockerId()))
+            throw new IncorrectLockerException(locker.getLocation());
+
+        if (!parcel.getPickupCode().equals(request.getPickupCode()))
             throw new InvalidPickupCodeException();
 
         parcel.setStatus(ParcelStatus.PICKED_UP);

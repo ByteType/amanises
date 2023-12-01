@@ -1,6 +1,5 @@
 package com.bytetype.amanises.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -34,7 +33,6 @@ public class Locker {
         this.location = location;
     }
 
-    @JsonManagedReference
     public List<Cabinet> getCabinets() {
         return cabinets;
     }

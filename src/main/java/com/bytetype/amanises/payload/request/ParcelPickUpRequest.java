@@ -4,18 +4,18 @@ import java.time.LocalDateTime;
 
 public class ParcelPickUpRequest {
 
-    private Long id;
+    private Long lockerId;
 
     private LocalDateTime pickedUpAt; // Require precises timing
 
     private String pickupCode;
 
-    public Long getId() {
-        return id;
+    public Long getLockerId() {
+        return lockerId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setLockerId(Long lockerId) {
+        this.lockerId = lockerId;
     }
 
     public LocalDateTime getPickedUpAt() {
