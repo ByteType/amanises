@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -28,6 +29,9 @@ public class DataBaseInjector {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @EventListener(ApplicationStartedEvent.class)
     public void init() throws RoleNotFoundException {
@@ -55,7 +59,7 @@ public class DataBaseInjector {
             roles.add(roleRepository.findByName(RoleType.ROLE_DRIVER).orElseThrow(RoleNotFoundException::new));
             User user = new User();
             user.setUsername("Driver");
-            user.setPassword("Password");
+            user.setPassword(passwordEncoder.encode("Password"));
             user.setRoles(roles);
             userRepository.saveAndFlush(user);
 
