@@ -97,6 +97,7 @@ public class AuthService {
             if (user.getRoles().isEmpty()) {
                 user.setUsername(request.getUsername());
                 user.setEmail(request.getEmail());
+                user.setPhone(request.getPhone());
                 user.setPassword(passwordEncoder.encode(request.getPassword()));
                 user.setAddress(request.getAddress());
             } else throw new UserExistException();

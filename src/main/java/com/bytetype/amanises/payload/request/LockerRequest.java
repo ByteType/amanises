@@ -1,7 +1,11 @@
 package com.bytetype.amanises.payload.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class LockerRequest {
 
+    @NotBlank
     private String location;
 
     private Integer size;

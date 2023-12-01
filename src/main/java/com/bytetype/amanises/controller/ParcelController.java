@@ -6,6 +6,7 @@ import com.bytetype.amanises.payload.request.ParcelDeliveryRequest;
 import com.bytetype.amanises.payload.request.ParcelPickUpRequest;
 import com.bytetype.amanises.payload.response.*;
 import com.bytetype.amanises.service.ParcelService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,7 +35,7 @@ public class ParcelController {
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> createParcel(@RequestBody ParcelCreateRequest request) {
+    public ResponseEntity<?> createParcel(@Valid @RequestBody ParcelCreateRequest request) {
         try {
             ParcelCreateResponse response = parcelService.createParcel(request);
 
@@ -47,7 +48,7 @@ public class ParcelController {
     }
 
     @PostMapping("/delivery")
-    public ResponseEntity<?> deliveryParcel(@RequestBody ParcelDeliveryRequest request) {
+    public ResponseEntity<?> deliveryParcel(@Valid @RequestBody ParcelDeliveryRequest request) {
         try {
             ParcelDeliveryResponse response = parcelService.deliveryParcel(request);
 
@@ -61,7 +62,7 @@ public class ParcelController {
 
     @PostMapping("/arrive")
     @PreAuthorize("hasRole('DRIVER')")
-    public ResponseEntity<?> arriveParcel(@RequestBody ParcelArriveRequest request) {
+    public ResponseEntity<?> arriveParcel(@Valid @RequestBody ParcelArriveRequest request) {
         try {
             ParcelArriveResponse response = parcelService.arriveParcel(request);
 
@@ -74,7 +75,7 @@ public class ParcelController {
     }
 
     @PostMapping("/pickup")
-    public ResponseEntity<?> pickupParcel(@RequestBody ParcelPickUpRequest request) {
+    public ResponseEntity<?> pickupParcel(@Valid @RequestBody ParcelPickUpRequest request) {
         try {
             ParcelPickUpResponse response = parcelService.pickUpParcel(request);
 

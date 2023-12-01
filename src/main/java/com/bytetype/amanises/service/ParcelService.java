@@ -40,6 +40,13 @@ public class ParcelService {
     @Autowired
     private UserService userService;
 
+    /**
+     * Retrieves the detailed information of a parcel by its ID, includes cabinet and locker related information.
+     *
+     * @param id The ID of the parcel to retrieve.
+     * @return ParcelDetailResponse containing detailed information about the parcel.
+     * @throws ParcelNotFoundException if the parcel with the specified ID is not found.
+     */
     public ParcelDetailResponse getParcelById(Long id) throws ParcelNotFoundException {
         Parcel parcel = parcelRepository.findById(id).orElseThrow(ParcelNotFoundException::new);
         Cabinet cabinet = cabinetRepository.findByParcelId(id).orElse(null);
@@ -62,6 +69,16 @@ public class ParcelService {
         );
     }
 
+    /**
+     * Creates a new parcel record based on the provided request details.
+     *
+     * @param request The request containing the details for creating a new parcel.
+     * @return ParcelCreateResponse containing the details of the newly created parcel.
+     * @throws RoleNotFoundException if the role is not found during user creation.
+     * @throws InvalidSenderException if the sender details are invalid.
+     * @throws InvalidRecipientException if the recipient details are invalid.
+     * @throws InvalidLockerException if the specified locker is invalid.
+     */
     public ParcelCreateResponse createParcel(ParcelCreateRequest request) throws RoleNotFoundException, InvalidSenderException, InvalidRecipientException, InvalidLockerException {
         User sender = userService.getOrCreateUser(request.getSender());
         if (sender == null) throw new InvalidSenderException();
@@ -87,15 +104,13 @@ public class ParcelService {
 
         List<ParcelExpect> parcelExpects = new ArrayList<>();
 
-        if (expectedSenderLockers != null && !expectedSenderLockers.isEmpty()) {
-            for (Long expectLocker : expectedSenderLockers) {
-                if (cabinetRepository.existsEmptyCabinetsByLockerId(expectLocker)){
-                    Cabinet cabinet = cabinetRepository.findEmptyCabinetsByLockerId(expectLocker).get(0);
-                    cabinet.setParcel(parcel);
-                    cabinet.setType(CabinetType.DELIVERY_PARCEL_EXIST);
-                    cabinetRepository.save(cabinet);
-                    break;
-                }
+        for (Long expectLocker : expectedSenderLockers) {
+            if (cabinetRepository.existsEmptyCabinetsByLockerId(expectLocker)) {
+                Cabinet cabinet = cabinetRepository.findEmptyCabinetsByLockerId(expectLocker).get(0);
+                cabinet.setParcel(parcel);
+                cabinet.setType(CabinetType.DELIVERY_PARCEL_EXIST);
+                cabinetRepository.save(cabinet);
+                break;
             }
         }
 
@@ -125,6 +140,15 @@ public class ParcelService {
         );
     }
 
+    /**
+     * Processes the delivery of a parcel based on the provided request details.
+     *
+     * @param request The request containing the details for parcel delivery.
+     * @return ParcelDeliveryResponse containing the details of the delivered parcel.
+     * @throws InvalidDeliveryCodeException if the delivery code is invalid.
+     * @throws IncorrectLockerException if the specified locker is incorrect.
+     * @throws Exception for other general exceptions.
+     */
     public ParcelDeliveryResponse deliveryParcel(ParcelDeliveryRequest request) throws Exception {
         Cabinet cabinet = cabinetRepository.findByDeliveryCode(request.getDeliveryCode()).orElseThrow(InvalidDeliveryCodeException::new);
         Locker locker = cabinet.getLocker();
@@ -155,6 +179,14 @@ public class ParcelService {
         );
     }
 
+    /**
+     * Updates the status of a parcel to indicate its arrival at a specified cabinet.
+     *
+     * @param request The request containing the details for the parcel's arrival.
+     * @return ParcelArriveResponse containing the updated details of the parcel.
+     * @throws ParcelNotFoundException if the parcel with the specified ID is not found.
+     * @throws CabinetNotFoundException if the specified cabinet is not found.
+     */
     public ParcelArriveResponse arriveParcel(ParcelArriveRequest request) throws ParcelNotFoundException, CabinetNotFoundException {
         Cabinet cabinet = cabinetRepository.findById(request.getCabinetId()).orElseThrow(CabinetNotFoundException::new);
         Parcel parcel = parcelRepository.findById(request.getId()).orElseThrow(ParcelNotFoundException::new);
@@ -183,6 +215,15 @@ public class ParcelService {
         );
     }
 
+    /**
+     * Handles the pickup of a parcel by updating its status and related details.
+     *
+     * @param request The request containing the details for picking up a parcel.
+     * @return ParcelPickUpResponse containing the details of the picked-up parcel.
+     * @throws InvalidPickupCodeException if the pickup code is invalid.
+     * @throws IncorrectLockerException if the specified locker is incorrect.
+     * @throws Exception for other general exceptions.
+     */
     public ParcelPickUpResponse pickUpParcel(ParcelPickUpRequest request) throws Exception {
         Cabinet cabinet = cabinetRepository.findByPickupCode(request.getPickupCode()).orElseThrow(InvalidPickupCodeException::new);
         Locker locker = cabinet.getLocker();
@@ -216,6 +257,12 @@ public class ParcelService {
         );
     }
 
+    /**
+     * Deletes a parcel record based on the provided ID.
+     *
+     * @param id The ID of the parcel to delete.
+     * @throws RuntimeException if the parcel with the specified ID is not found.
+     */
     public void deleteParcel(Long id) {
         Parcel parcel = parcelRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Parcel not found with id: " + id));
@@ -223,6 +270,13 @@ public class ParcelService {
         parcelRepository.delete(parcel);
     }
 
+    /**
+     * Generates a random code of specified length.
+     *
+     * @param length The length of the code to generate.
+     * @return A string representing the generated code.
+     * @throws IllegalArgumentException if the length is non-positive.
+     */
     public String generateCode(int length) {
         if (length <= 0) throw new IllegalArgumentException("Length must be positive");
         int max = (int)Math.pow(10, length);
