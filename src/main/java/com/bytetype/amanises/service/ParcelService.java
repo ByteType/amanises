@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -161,6 +162,7 @@ public class ParcelService {
             throw new InvalidDeliveryCodeException();
 
         parcel.setStatus(ParcelStatus.DELIVERED);
+        parcel.setDeliveryCode(null);
         parcelRepository.save(parcel);
 
         cabinet.setParcel(parcel);
@@ -169,6 +171,7 @@ public class ParcelService {
 
         return new ParcelDeliveryResponse(
                 parcel.getId(),
+                cabinet.getId(),
                 UserPayload.createFrom(parcel.getSender()),
                 UserPayload.createFrom(parcel.getRecipient()),
                 parcel.getWidth(),
@@ -192,9 +195,8 @@ public class ParcelService {
         Parcel parcel = parcelRepository.findById(request.getId()).orElseThrow(ParcelNotFoundException::new);
 
         parcel.setStatus(ParcelStatus.READY_FOR_PICKUP);
-        parcel.setReadyForPickupAt(request.getReadyForPickupAt());
+        parcel.setReadyForPickupAt(LocalDateTime.now());
         parcel.setPickupCode(generateCode(4));
-        parcel.setDeliveryCode(null);
         parcel.setExpectedLocker(null);
         parcelRepository.save(parcel);
 
@@ -236,7 +238,7 @@ public class ParcelService {
             throw new InvalidPickupCodeException();
 
         parcel.setStatus(ParcelStatus.PICKED_UP);
-        parcel.setPickedUpAt(request.getPickedUpAt());
+        parcel.setPickedUpAt(LocalDateTime.now());
         parcel.setPickupCode(null);
         parcelRepository.save(parcel);
 
@@ -246,6 +248,7 @@ public class ParcelService {
 
         return new ParcelPickUpResponse(
                 parcel.getId(),
+                cabinet.getId(),
                 UserPayload.createFrom(parcel.getSender()),
                 UserPayload.createFrom(parcel.getRecipient()),
                 parcel.getWidth(),

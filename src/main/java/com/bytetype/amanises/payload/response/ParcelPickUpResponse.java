@@ -10,12 +10,15 @@ public class ParcelPickUpResponse extends ParcelDetailPayload {
 
     private Long id;
 
+    private Long cabinetId;
+
     private ParcelStatus status;
 
     private LocalDateTime pickedUpAt;
 
     public ParcelPickUpResponse(
             Long id,
+            Long cabinetId,
             UserPayload sender,
             UserPayload recipient,
             Double width,
@@ -26,6 +29,7 @@ public class ParcelPickUpResponse extends ParcelDetailPayload {
             LocalDateTime pickedUpAt
     ) {
         this.id = id;
+        this.cabinetId = cabinetId;
         this.status = status;
         this.pickedUpAt = pickedUpAt;
         this.setSender(sender);
@@ -42,6 +46,14 @@ public class ParcelPickUpResponse extends ParcelDetailPayload {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getCabinetId() {
+        return cabinetId;
+    }
+
+    public void setCabinetId(Long cabinetId) {
+        this.cabinetId = cabinetId;
     }
 
     public ParcelStatus getStatus() {

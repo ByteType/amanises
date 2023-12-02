@@ -6,8 +6,6 @@ public class ParcelArriveRequest {
 
     private Long id;
 
-    private LocalDateTime readyForPickupAt; // Time arrive.
-
     private Long cabinetId;
 
     public Long getId() {
@@ -16,14 +14,6 @@ public class ParcelArriveRequest {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public LocalDateTime getReadyForPickupAt() {
-        return readyForPickupAt;
-    }
-
-    public void setReadyForPickupAt(LocalDateTime readyForPickupAt) {
-        this.readyForPickupAt = readyForPickupAt;
     }
 
     public Long getCabinetId() {

@@ -8,10 +8,13 @@ public class ParcelDeliveryResponse extends ParcelDetailPayload {
 
     private Long id;
 
+    private Long cabinetId;
+
     private ParcelStatus status;
 
     public ParcelDeliveryResponse(
             Long id,
+            Long cabinetId,
             UserPayload sender,
             UserPayload recipient,
             Double width,
@@ -21,6 +24,7 @@ public class ParcelDeliveryResponse extends ParcelDetailPayload {
             ParcelStatus status
     ) {
         this.id = id;
+        this.cabinetId = cabinetId;
         this.status = status;
         this.setSender(sender);
         this.setRecipient(recipient);
@@ -36,6 +40,14 @@ public class ParcelDeliveryResponse extends ParcelDetailPayload {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getCabinetId() {
+        return cabinetId;
+    }
+
+    public void setCabinetId(Long cabinetId) {
+        this.cabinetId = cabinetId;
     }
 
     public ParcelStatus getStatus() {

@@ -223,7 +223,6 @@ public class ParcelControllerTest {
 
         ParcelArriveRequest arriveRequest = new ParcelArriveRequest();
         arriveRequest.setId(parcel.getId());
-        arriveRequest.setReadyForPickupAt(LocalDateTime.now());
         arriveRequest.setCabinetId(cabinet.getId());
 
         String body = objectMapper.writeValueAsString(arriveRequest);
@@ -265,7 +264,6 @@ public class ParcelControllerTest {
 
         ParcelPickUpRequest pickUpRequest = new ParcelPickUpRequest();
         pickUpRequest.setLockerId(locker.getId());
-        pickUpRequest.setPickedUpAt(LocalDateTime.now());
         pickUpRequest.setPickupCode(code);
 
         String body = objectMapper.writeValueAsString(pickUpRequest);
