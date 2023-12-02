@@ -17,16 +17,16 @@ repositories {
 	mavenCentral()
 }
 
-configurations {
-	developImplementation.extendsFrom implementation
-	developRuntimeOnly.extendsFrom runtimeOnly
-}
-
 sourceSets {
 	develop {
 		compileClasspath += main.output
 		runtimeClasspath += main.output
 	}
+}
+
+configurations {
+	developImplementation.extendsFrom implementation
+	developRuntimeOnly.extendsFrom runtimeOnly
 }
 
 dependencies {
