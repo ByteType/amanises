@@ -6,5 +6,7 @@ public enum CabinetType {
 
     DELIVERY_PARCEL_EXIST,
 
+    DISTRIBUTE_PARCEL_EXIST,
+
     PICKUP_PARCEL_EXIST
 }

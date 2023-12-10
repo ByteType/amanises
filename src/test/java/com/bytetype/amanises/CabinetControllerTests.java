@@ -97,7 +97,8 @@ public class CabinetControllerTests {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername("Driver");
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
         User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
-        Cabinet cabinet = cabinetRepository.findAll().get(0);
+        Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[0]).orElseThrow();
+        Cabinet cabinet = cabinetRepository.findEmptyCabinetsByLockerId(locker.getId()).get(0);
         Random random = new Random();
 
         Parcel parcel = new Parcel();

@@ -1,11 +1,7 @@
 package com.bytetype.amanises.controller;
 
-import com.bytetype.amanises.model.ParcelStatus;
 import com.bytetype.amanises.payload.common.ParcelPayload;
-import com.bytetype.amanises.payload.request.ParcelArriveRequest;
-import com.bytetype.amanises.payload.request.ParcelCreateRequest;
-import com.bytetype.amanises.payload.request.ParcelDeliveryRequest;
-import com.bytetype.amanises.payload.request.ParcelPickUpRequest;
+import com.bytetype.amanises.payload.request.*;
 import com.bytetype.amanises.payload.response.*;
 import com.bytetype.amanises.service.ParcelService;
 import jakarta.validation.Valid;
@@ -69,6 +65,20 @@ public class ParcelController {
     public ResponseEntity<?> deliveryParcel(@Valid @RequestBody ParcelDeliveryRequest request) {
         try {
             ParcelDeliveryResponse response = parcelService.deliveryParcel(request);
+
+            return ResponseEntity.ok()
+                    .body(response);
+        } catch (Exception exception) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(exception.getMessage()));
+        }
+    }
+
+    @PostMapping("/distribute")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<?> distributeParcel(@Valid @RequestBody ParcelDistributeRequest request) {
+        try {
+            ParcelDistributeResponse response = parcelService.distributeParcel(request);
 
             return ResponseEntity.ok()
                     .body(response);

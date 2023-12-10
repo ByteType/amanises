@@ -4,11 +4,11 @@ import com.bytetype.amanises.model.ParcelStatus;
 import com.bytetype.amanises.payload.common.ParcelPayload;
 import com.bytetype.amanises.payload.common.UserPayload;
 
-public class ParcelDeliveryResponse extends ParcelPayload {
+public class ParcelDistributeResponse extends ParcelPayload {
 
     private Long cabinetId;
 
-    public ParcelDeliveryResponse(
+    public ParcelDistributeResponse(
             Long id,
             Long cabinetId,
             UserPayload sender,

@@ -5,10 +5,7 @@ import com.bytetype.amanises.model.*;
 import com.bytetype.amanises.payload.common.CabinetPayload;
 import com.bytetype.amanises.payload.common.ParcelPayload;
 import com.bytetype.amanises.payload.common.UserPayload;
-import com.bytetype.amanises.payload.request.ParcelArriveRequest;
-import com.bytetype.amanises.payload.request.ParcelCreateRequest;
-import com.bytetype.amanises.payload.request.ParcelDeliveryRequest;
-import com.bytetype.amanises.payload.request.ParcelPickUpRequest;
+import com.bytetype.amanises.payload.request.*;
 import com.bytetype.amanises.payload.response.*;
 import com.bytetype.amanises.repository.CabinetRepository;
 import com.bytetype.amanises.repository.LockerRepository;
@@ -182,21 +179,45 @@ public class ParcelService {
 
         parcel.setStatus(ParcelStatus.DELIVERED);
         parcel.setDeliveryCode(null);
-        parcelRepository.save(parcel);
+        parcel = parcelRepository.save(parcel);
 
-        cabinet.setParcel(null);
-        cabinet.setType(CabinetType.OPEN);
+        cabinet.setParcel(parcel);
+        cabinet.setType(CabinetType.DISTRIBUTE_PARCEL_EXIST);
         cabinetRepository.save(cabinet);
 
         return new ParcelDeliveryResponse(
                 parcel.getId(),
+                parcel.getId(),
+                UserPayload.createFrom(parcel.getSender()),
+                UserPayload.createFrom(parcel.getRecipient()),
+                parcel.getStatus()
+        );
+    }
+
+    /**
+     * Distributes a parcel to a specified cabinet.
+     *
+     * @param request The request containing the parcel id and cabinet id.
+     * @return ParcelDistributeResponse containing the details of the delivered parcel.
+     * @throws CabinetNotFoundException if the cabinet with the specified ID does not exist.
+     * @throws ParcelNotFoundException if the parcel with the specified ID does not exist.
+     */
+    public ParcelDistributeResponse distributeParcel(ParcelDistributeRequest request) throws CabinetNotFoundException, ParcelNotFoundException {
+        Cabinet cabinet = cabinetRepository.findById(request.getCabinetId()).orElseThrow(CabinetNotFoundException::new);
+        Parcel parcel = parcelRepository.findById(request.getId()).orElseThrow(ParcelNotFoundException::new);
+
+        parcel.setStatus(ParcelStatus.DISTRIBUTE);
+        parcel = parcelRepository.save(parcel);
+
+        cabinet.setParcel(parcel);
+        cabinet.setType(CabinetType.DISTRIBUTE_PARCEL_EXIST);
+        cabinetRepository.save(cabinet);
+
+        return new ParcelDistributeResponse(
+                parcel.getId(),
                 cabinet.getId(),
                 UserPayload.createFrom(parcel.getSender()),
                 UserPayload.createFrom(parcel.getRecipient()),
-                parcel.getWidth(),
-                parcel.getHeight(),
-                parcel.getDepth(),
-                parcel.getMass(),
                 parcel.getStatus()
         );
     }
@@ -217,7 +238,7 @@ public class ParcelService {
         parcel.setReadyForPickupAt(LocalDateTime.now());
         parcel.setPickupCode(generateCode(4));
         parcel.setExpectedLocker(null);
-        parcelRepository.save(parcel);
+        parcel = parcelRepository.save(parcel);
 
         cabinet.setParcel(parcel);
         cabinet.setType(CabinetType.PICKUP_PARCEL_EXIST);
@@ -227,10 +248,6 @@ public class ParcelService {
                 parcel.getId(),
                 UserPayload.createFrom(parcel.getSender()),
                 UserPayload.createFrom(parcel.getRecipient()),
-                parcel.getWidth(),
-                parcel.getHeight(),
-                parcel.getDepth(),
-                parcel.getMass(),
                 parcel.getStatus(),
                 parcel.getPickupCode()
         );
@@ -259,7 +276,7 @@ public class ParcelService {
         parcel.setStatus(ParcelStatus.PICKED_UP);
         parcel.setPickedUpAt(LocalDateTime.now());
         parcel.setPickupCode(null);
-        parcelRepository.save(parcel);
+        parcel = parcelRepository.save(parcel);
 
         cabinet.setParcel(null);
         cabinet.setType(CabinetType.OPEN);

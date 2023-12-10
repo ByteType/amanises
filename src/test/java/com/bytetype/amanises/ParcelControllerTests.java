@@ -3,10 +3,7 @@ package com.bytetype.amanises;
 import com.bytetype.amanises.exception.RoleNotFoundException;
 import com.bytetype.amanises.model.*;
 import com.bytetype.amanises.payload.common.UserPayload;
-import com.bytetype.amanises.payload.request.ParcelArriveRequest;
-import com.bytetype.amanises.payload.request.ParcelCreateRequest;
-import com.bytetype.amanises.payload.request.ParcelDeliveryRequest;
-import com.bytetype.amanises.payload.request.ParcelPickUpRequest;
+import com.bytetype.amanises.payload.request.*;
 import com.bytetype.amanises.repository.*;
 import com.bytetype.amanises.security.jwt.JwtTokenProvider;
 import com.bytetype.amanises.utility.LockerUtilities;
@@ -203,6 +200,7 @@ public class ParcelControllerTests {
                         .content(body))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(ParcelStatus.CREATE.name()))
                 .andExpect(jsonPath("$.deliveryCode").isString());
     }
 
@@ -245,6 +243,41 @@ public class ParcelControllerTests {
     }
 
     @Test
+    public void testDistributeParcel() throws Exception {
+        String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername("Driver");
+        User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
+        User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
+        Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[1]).orElseThrow();
+        Cabinet cabinet = cabinetRepository.findEmptyCabinetsByLockerId(locker.getId()).get(0);
+        Random random = new Random();
+
+        Parcel parcel = new Parcel();
+        parcel.setSender(sender);
+        parcel.setRecipient(recipient);
+        parcel.setWidth(random.nextDouble() * 10.0);
+        parcel.setHeight(random.nextDouble() * 5.0);
+        parcel.setDepth(random.nextDouble() * 2.0);
+        parcel.setMass(random.nextDouble() * 1.5);
+        parcel.setReadyForPickupAt(LocalDateTime.now());
+        parcel.setDeliveryCode(generateCode(4));
+        parcel = parcelRepository.saveAndFlush(parcel);
+
+        ParcelDistributeRequest distributeRequest = new ParcelDistributeRequest();
+        distributeRequest.setId(parcel.getId());
+        distributeRequest.setCabinetId(cabinet.getId());
+
+        String body = objectMapper.writeValueAsString(distributeRequest);
+
+        mockMvc.perform(post("/api/parcels/distribute")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(ParcelStatus.DISTRIBUTE.name()));
+    }
+
+    @Test
     public void testArriveParcel() throws Exception {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername("Driver");
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
@@ -276,6 +309,7 @@ public class ParcelControllerTests {
                         .content(body))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(ParcelStatus.READY_FOR_PICKUP.name()))
                 .andExpect(jsonPath("$.pickupCode").isString());
     }
 

@@ -6,6 +6,8 @@ public enum ParcelStatus {
 
     DELIVERED,
 
+    DISTRIBUTE,
+
     READY_FOR_PICKUP,
 
     PICKED_UP,
