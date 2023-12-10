@@ -88,13 +88,12 @@ public class AuthService {
      * @throws RoleNotFoundException if the role provided in the request does not exist.
      */
     public UserInfoResponse registerUser(SignupRequest request) throws NameExistException, UserExistException, RoleNotFoundException {
-        if (userRepository.existsByUsername(request.getUsername())) throw new NameExistException();
-
         User user;
 
         if (userRepository.existsByAddress(request.getAddress())) {
             user = userRepository.findByAddress(request.getAddress()).orElseThrow();
-            if (user.getRoles().isEmpty()) {
+            Role guest = roleRepository.findByName(RoleType.ROLE_GUEST).orElseThrow(RoleNotFoundException::new);
+            if (user.getRoles().isEmpty() || user.getRoles().contains(guest)) {
                 user.setUsername(request.getUsername());
                 user.setEmail(request.getEmail());
                 user.setPhone(request.getPhone());
@@ -102,6 +101,8 @@ public class AuthService {
                 user.setAddress(request.getAddress());
             } else throw new UserExistException();
         } else {
+            if (userRepository.existsByUsername(request.getUsername())) throw new NameExistException();
+
             user = User.createFrom(request, passwordEncoder.encode(request.getPassword()));
         }
 

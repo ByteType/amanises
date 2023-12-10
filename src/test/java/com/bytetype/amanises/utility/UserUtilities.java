@@ -19,4 +19,14 @@ public class UserUtilities {
         user.setRoles(roles);
         return user;
     }
+
+    public static User createUser(String name, String address, Role role) {
+        Set<Role> roles = new HashSet<>();
+        roles.add(role);
+        User user = new User();
+        user.setUsername(name);
+        user.setAddress(address);
+        user.setRoles(roles);
+        return user;
+    }
 }
