@@ -184,8 +184,8 @@ public class ParcelService {
         parcel.setDeliveryCode(null);
         parcelRepository.save(parcel);
 
-        cabinet.setParcel(parcel);
-        cabinet.setType(CabinetType.DELIVERY_PARCEL_EXIST);
+        cabinet.setParcel(null);
+        cabinet.setType(CabinetType.OPEN);
         cabinetRepository.save(cabinet);
 
         return new ParcelDeliveryResponse(
