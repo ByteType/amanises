@@ -3,6 +3,7 @@ package com.bytetype.amanises.service;
 import com.bytetype.amanises.exception.*;
 import com.bytetype.amanises.model.*;
 import com.bytetype.amanises.payload.common.CabinetPayload;
+import com.bytetype.amanises.payload.common.ParcelPayload;
 import com.bytetype.amanises.payload.common.UserPayload;
 import com.bytetype.amanises.payload.request.ParcelArriveRequest;
 import com.bytetype.amanises.payload.request.ParcelCreateRequest;
@@ -20,6 +21,7 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ParcelService {
@@ -68,6 +70,23 @@ public class ParcelService {
                 cabinet != null ? cabinet.getLocker().getLocation() : null,
                 cabinet != null ? CabinetPayload.createFrom(cabinet) : null
         );
+    }
+
+    /**
+     * Finds a list of parcels based on their status and the expected locker location.
+     * This method performs a join across the Parcel, ParcelExpect, and Locker entities
+     * to filter parcels that match the specified status and are expected to be in a locker
+     * at the specified location.
+     *
+     * @param location the expected location of the locker
+     * @return a list of {@link Parcel} entities that match the given status and locker location
+     */
+    public List<ParcelPayload> getParcelsByExpectedLocation(String location) {
+        List<Parcel> parcels = parcelRepository.findParcelsByExpectedLocation(location);
+
+        return parcels.stream()
+                .map(ParcelPayload::createFrom)
+                .collect(Collectors.toList());
     }
 
     /**

@@ -68,7 +68,7 @@ public class CabinetControllerTests {
 
         private static final String[] address = { "123 Main St, " + className + "Town, NA", "456 Main St, " + className + "Town, NA" };
 
-        private static final String[] location = { "NullTown, NA", "BlobTown, NA" };
+        private static final String[] location = { className + "ATown, NA", className + "BTown, NA" };
     }
 
     @BeforeAll

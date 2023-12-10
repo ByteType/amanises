@@ -1,5 +1,6 @@
 package com.bytetype.amanises.controller;
 
+import com.bytetype.amanises.payload.response.CabinetResponse;
 import com.bytetype.amanises.payload.response.MessageResponse;
 import com.bytetype.amanises.service.CabinetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ public class CabinetController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getCabinetById(@PathVariable Long id) {
         try {
-            var response = cabinetService.getCabinetById(id);
+            CabinetResponse response = cabinetService.getCabinetById(id);
 
             return ResponseEntity.ok()
                     .body(response);

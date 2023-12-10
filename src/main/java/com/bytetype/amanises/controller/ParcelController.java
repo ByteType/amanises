@@ -1,5 +1,7 @@
 package com.bytetype.amanises.controller;
 
+import com.bytetype.amanises.model.ParcelStatus;
+import com.bytetype.amanises.payload.common.ParcelPayload;
 import com.bytetype.amanises.payload.request.ParcelArriveRequest;
 import com.bytetype.amanises.payload.request.ParcelCreateRequest;
 import com.bytetype.amanises.payload.request.ParcelDeliveryRequest;
@@ -11,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -24,6 +28,20 @@ public class ParcelController {
     public ResponseEntity<?> getParcelById(@PathVariable(value = "id") Long id) {
         try {
             ParcelDetailResponse response = parcelService.getParcelById(id);
+
+            return ResponseEntity.ok()
+                    .body(response);
+        } catch (Exception exception) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(exception.getMessage()));
+        }
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<?> getParcelsByExpectedLocation(@RequestParam("location") String location) {
+        try {
+            List<ParcelPayload> response = parcelService.getParcelsByExpectedLocation(location);
 
             return ResponseEntity.ok()
                     .body(response);

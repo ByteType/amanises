@@ -45,8 +45,10 @@ public class LockerControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private static final String className = LockerControllerTests.class.getSimpleName();
+
     private static class DataSet {
-        private static final String[] location = { "testLocation1", "testLocation2" };
+        private static final String[] location = { className + "ATown, NA", className + "BTown, NA" };
     }
 
     @BeforeAll

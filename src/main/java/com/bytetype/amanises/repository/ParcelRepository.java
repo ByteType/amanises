@@ -9,6 +9,9 @@ import java.util.List;
 
 public interface ParcelRepository extends JpaRepository<Parcel, Long> {
 
+    @Query("SELECT p FROM Parcel p JOIN p.expectedLocker pe JOIN pe.locker l WHERE p.status = com.bytetype.amanises.model.ParcelStatus.DELIVERED AND l.location = :location")
+    List<Parcel> findParcelsByExpectedLocation(@Param("location") String location);
+
     @Query("SELECT p FROM Parcel p WHERE p.sender.id = :userId OR p.recipient.id = :userId")
     List<Parcel> findBySenderIdOrRecipientId(@Param("userId") Long userId);
 }

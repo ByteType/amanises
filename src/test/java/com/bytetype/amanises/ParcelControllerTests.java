@@ -53,6 +53,9 @@ public class ParcelControllerTests {
     private ParcelRepository parcelRepository;
 
     @Autowired
+    private ParcelExpectRepository parcelExpectRepository;
+
+    @Autowired
     private CabinetRepository cabinetRepository;
 
     @Autowired
@@ -78,7 +81,7 @@ public class ParcelControllerTests {
 
         private static final String[] address = { "123 Main St, " + className + "Town, NA", "456 Main St, " + className + "Town, NA" };
 
-        private static final String[] location = { "NullTown, NA", "BlobTown, NA" };
+        private static final String[] location = { className + "ATown, NA", className + "BTown, NA" };
     }
 
     @BeforeAll
@@ -135,6 +138,45 @@ public class ParcelControllerTests {
     }
 
     @Test
+    public void testGetParcelsByStatus() throws Exception {
+        String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername("Driver");
+        User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
+        User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
+        Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[0]).orElseThrow();
+        Random random = new Random();
+
+        Parcel parcel = new Parcel();
+        parcel.setSender(sender);
+        parcel.setRecipient(recipient);
+        parcel.setWidth(random.nextDouble() * 10.0);
+        parcel.setHeight(random.nextDouble() * 5.0);
+        parcel.setDepth(random.nextDouble() * 2.0);
+        parcel.setMass(random.nextDouble() * 1.5);
+        parcel.setStatus(ParcelStatus.DELIVERED);
+        parcel.setReadyForPickupAt(LocalDateTime.now());
+        parcel.setDeliveryCode(generateCode(4));
+        parcel = parcelRepository.saveAndFlush(parcel);
+
+        List<ParcelExpect> parcelExpects = new ArrayList<>();
+
+        ParcelExpect parcelExpect = new ParcelExpect();
+        parcelExpect.setLocker(locker);
+        parcelExpect.setParcel(parcel);
+        parcelExpects.add(parcelExpect);
+
+        parcelExpectRepository.saveAll(parcelExpects);
+
+        mockMvc.perform(get("/api/parcels")
+                        .param("status", ParcelStatus.DELIVERED.name())
+                        .param("location", DataSet.location[0])
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$..status").value(ParcelStatus.DELIVERED.name()));
+    }
+
+    @Test
     public void testCreateParcel() throws Exception {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
@@ -169,8 +211,8 @@ public class ParcelControllerTests {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
         User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
-        Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[0]).orElseThrow();
-        Cabinet cabinet = locker.getCabinets().get(0);
+        Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[1]).orElseThrow();
+        Cabinet cabinet = cabinetRepository.findEmptyCabinetsByLockerId(locker.getId()).get(0);
         Random random = new Random();
 
         Parcel parcel = new Parcel();
@@ -207,7 +249,8 @@ public class ParcelControllerTests {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername("Driver");
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
         User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
-        Cabinet cabinet = cabinetRepository.findAll().get(1);
+        Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[1]).orElseThrow();
+        Cabinet cabinet = cabinetRepository.findEmptyCabinetsByLockerId(locker.getId()).get(0);
         Random random = new Random();
 
         Parcel parcel = new Parcel();
@@ -241,8 +284,8 @@ public class ParcelControllerTests {
         String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
         User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
         User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
-        Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[0]).orElseThrow();
-        Cabinet cabinet = locker.getCabinets().get(0);
+        Locker locker = lockerRepository.findByLocationWithCabinets(DataSet.location[1]).orElseThrow();
+        Cabinet cabinet = cabinetRepository.findEmptyCabinetsByLockerId(locker.getId()).get(0);
         Random random = new Random();
 
         String code = generateCode(4);
