@@ -1,16 +1,11 @@
 package com.bytetype.amanises;
 
 import com.bytetype.amanises.exception.RoleNotFoundException;
-import com.bytetype.amanises.model.Role;
-import com.bytetype.amanises.model.RoleType;
-import com.bytetype.amanises.model.User;
-import com.bytetype.amanises.repository.ParcelRepository;
-import com.bytetype.amanises.repository.RoleRepository;
-import com.bytetype.amanises.repository.UserRepository;
+import com.bytetype.amanises.model.*;
+import com.bytetype.amanises.repository.*;
 import com.bytetype.amanises.security.jwt.JwtTokenProvider;
-import com.bytetype.amanises.utility.ParcelUtilities;
+import com.bytetype.amanises.utility.LockerUtilities;
 import com.bytetype.amanises.utility.UserUtilities;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -22,10 +17,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
-import static org.hamcrest.Matchers.hasSize;
+import static com.bytetype.amanises.utility.ParcelUtilities.generateCode;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest
 @ActiveProfiles("test")
-public class UserControllerTest {
+public class CabinetControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
@@ -48,29 +46,35 @@ public class UserControllerTest {
     private ParcelRepository parcelRepository;
 
     @Autowired
+    private CabinetRepository cabinetRepository;
+
+    @Autowired
+    private LockerRepository lockerRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    private static final String className = UserControllerTest.class.getSimpleName();
+    private static final String className = CabinetControllerTests.class.getSimpleName();
 
     private static class DataSet {
         private static final String[] username = { className + "User1", className + "User2" };
 
-        private static final String[] email = { className + "User1@testDomain.com", className + "User2@testDomain.com" };
+        private static final String[] email = { className +"User1@testDomain.com", className + "User2@testDomain.com" };
 
         private static final String[] password = { "testPassword1", "testPassword2" };
 
         private static final String[] address = { "123 Main St, " + className + "Town, NA", "456 Main St, " + className + "Town, NA" };
+
+        private static final String[] location = { "NullTown, NA", "BlobTown, NA" };
     }
 
     @BeforeAll
     public void init() throws RoleNotFoundException {
         Role role = roleRepository.findByName(RoleType.ROLE_USER).orElseThrow(RoleNotFoundException::new);
+        LockerUtilities.LockerData lockerData = LockerUtilities.createLockers(Arrays.asList(DataSet.location));
         List<User> users = new ArrayList<>();
 
         for (int i = 0; i < DataSet.username.length; i++) {
@@ -84,20 +88,39 @@ public class UserControllerTest {
         }
 
         userRepository.saveAllAndFlush(users);
-        parcelRepository.saveAllAndFlush(ParcelUtilities.createParcels(users, 1));
+        lockerRepository.saveAllAndFlush(lockerData.lockers());
+        cabinetRepository.saveAllAndFlush(lockerData.cabinets());
     }
 
     @Test
-    public void testGetUserDetail() throws Exception {
-        String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername(DataSet.username[0]);
-        User user = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
+    public void testGetParcel() throws Exception {
+        String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername("Driver");
+        User sender = userRepository.findByUsername(DataSet.username[0]).orElseThrow();
+        User recipient = userRepository.findByUsername(DataSet.username[1]).orElseThrow();
+        Cabinet cabinet = cabinetRepository.findAll().get(0);
+        Random random = new Random();
 
-        mockMvc.perform(get("/api/user/{id}", user.getId())
-                        .header("Authorization", token))
+        Parcel parcel = new Parcel();
+        parcel.setSender(sender);
+        parcel.setRecipient(recipient);
+        parcel.setWidth(random.nextDouble() * 10.0);
+        parcel.setHeight(random.nextDouble() * 5.0);
+        parcel.setDepth(random.nextDouble() * 2.0);
+        parcel.setMass(random.nextDouble() * 1.5);
+        parcel.setStatus(ParcelStatus.CREATE);
+        parcel.setReadyForPickupAt(LocalDateTime.now());
+        parcel.setDeliveryCode(generateCode(4));
+        parcel = parcelRepository.saveAndFlush(parcel);
+
+        cabinet.setParcel(parcel);
+        cabinetRepository.saveAndFlush(cabinet);
+
+        mockMvc.perform(get("/api/cabinets/{id}", cabinet.getId())
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.parcels", hasSize(2)))
-                .andExpect(jsonPath("$.username").value(DataSet.username[0]))
-                .andExpect(jsonPath("$.email").value(DataSet.email[0]));
+                .andExpect(jsonPath("$.type").value(CabinetType.OPEN.name()))
+                .andExpect(jsonPath("$.status").value(ParcelStatus.CREATE.name()));
     }
 }

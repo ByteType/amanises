@@ -3,8 +3,6 @@ package com.bytetype.amanises.payload.request;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 
-import java.time.LocalDateTime;
-
 public class ParcelPickUpRequest {
 
     private Long lockerId;

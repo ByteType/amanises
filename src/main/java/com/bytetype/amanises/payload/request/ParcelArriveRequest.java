@@ -1,7 +1,5 @@
 package com.bytetype.amanises.payload.request;
 
-import java.time.LocalDateTime;
-
 public class ParcelArriveRequest {
 
     private Long id;

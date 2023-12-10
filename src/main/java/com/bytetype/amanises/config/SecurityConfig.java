@@ -41,6 +41,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/parcels/**").permitAll()
                                 .requestMatchers("/api/lockers/**").permitAll()
                                 .requestMatchers("/api/user/**").hasRole("USER")
+                                .requestMatchers("/api/cabinets/**").hasRole("DRIVER")
                                 .anyRequest().authenticated()
                 );
 

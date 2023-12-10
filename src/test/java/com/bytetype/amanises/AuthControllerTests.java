@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest
 @ActiveProfiles("test")
-public class AuthControllerTest {
+public class AuthControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
@@ -49,7 +49,7 @@ public class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static final String className = AuthControllerTest.class.getSimpleName();
+    private static final String className = AuthControllerTests.class.getSimpleName();
 
     private static class DataSet {
         private static final String[] username = { className + "User1", className + "User2" };
