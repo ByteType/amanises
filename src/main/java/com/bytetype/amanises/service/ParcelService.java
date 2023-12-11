@@ -13,6 +13,7 @@ import com.bytetype.amanises.repository.ParcelExpectRepository;
 import com.bytetype.amanises.repository.ParcelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -39,6 +40,9 @@ public class ParcelService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EmailService emailService;
 
     /**
      * Retrieves the detailed information of a parcel by its ID, includes cabinet and locker related information.
@@ -96,6 +100,7 @@ public class ParcelService {
      * @throws InvalidRecipientException if the recipient details are invalid.
      * @throws InvalidLockerException if the specified locker is invalid.
      */
+    @Transactional
     public ParcelCreateResponse createParcel(ParcelCreateRequest request) throws RoleNotFoundException, InvalidSenderException, InvalidRecipientException, InvalidLockerException {
         User sender = userService.getOrCreateUser(request.getSender());
         if (sender == null) throw new InvalidSenderException();
@@ -166,6 +171,7 @@ public class ParcelService {
      * @throws IncorrectLockerException if the specified locker is incorrect.
      * @throws Exception for other general exceptions.
      */
+    @Transactional
     public ParcelDeliveryResponse deliveryParcel(ParcelDeliveryRequest request) throws Exception {
         Cabinet cabinet = cabinetRepository.findByDeliveryCode(request.getDeliveryCode()).orElseThrow(InvalidDeliveryCodeException::new);
         Locker locker = cabinet.getLocker();
@@ -202,6 +208,7 @@ public class ParcelService {
      * @throws CabinetNotFoundException if the cabinet with the specified ID does not exist.
      * @throws ParcelNotFoundException if the parcel with the specified ID does not exist.
      */
+    @Transactional
     public ParcelDistributeResponse distributeParcel(ParcelDistributeRequest request) throws CabinetNotFoundException, ParcelNotFoundException {
         Cabinet cabinet = cabinetRepository.findById(request.getCabinetId()).orElseThrow(CabinetNotFoundException::new);
         Parcel parcel = parcelRepository.findById(request.getId()).orElseThrow(ParcelNotFoundException::new);
@@ -210,7 +217,7 @@ public class ParcelService {
         parcel = parcelRepository.save(parcel);
 
         cabinet.setParcel(parcel);
-        cabinet.setType(CabinetType.DISTRIBUTE_PARCEL_EXIST);
+        cabinet.setType(CabinetType.OPEN);
         cabinetRepository.save(cabinet);
 
         return new ParcelDistributeResponse(
@@ -230,19 +237,34 @@ public class ParcelService {
      * @throws ParcelNotFoundException if the parcel with the specified ID is not found.
      * @throws CabinetNotFoundException if the specified cabinet is not found.
      */
+    @Transactional
     public ParcelArriveResponse arriveParcel(ParcelArriveRequest request) throws ParcelNotFoundException, CabinetNotFoundException {
         Cabinet cabinet = cabinetRepository.findById(request.getCabinetId()).orElseThrow(CabinetNotFoundException::new);
         Parcel parcel = parcelRepository.findById(request.getId()).orElseThrow(ParcelNotFoundException::new);
 
+        List<ParcelExpect> parcelExpects = parcelExpectRepository.findByParcelId(request.getId());
+        if (!parcelExpects.isEmpty()) parcelExpectRepository.deleteAllInBatch(parcelExpects);
+
+        String pickupCode = generateCode(4);
+
         parcel.setStatus(ParcelStatus.READY_FOR_PICKUP);
         parcel.setReadyForPickupAt(LocalDateTime.now());
-        parcel.setPickupCode(generateCode(4));
+        parcel.setPickupCode(pickupCode);
         parcel.setExpectedLocker(null);
         parcel = parcelRepository.save(parcel);
 
         cabinet.setParcel(parcel);
         cabinet.setType(CabinetType.PICKUP_PARCEL_EXIST);
         cabinetRepository.save(cabinet);
+
+        String email = parcel.getRecipient().getEmail();
+
+        if (!email.isEmpty()) {
+            String text = "Hello, " + parcel.getRecipient().getUsername() + "!\n\n"
+                    + "Your parcel id: " + parcel.getId() + " arrive!\n"
+                    + "Pickup code :\n" + pickupCode;
+            emailService.sendEmailAsync(email, "Parcel pickup code", text);
+        }
 
         return new ParcelArriveResponse(
                 parcel.getId(),
@@ -262,6 +284,7 @@ public class ParcelService {
      * @throws IncorrectLockerException if the specified locker is incorrect.
      * @throws Exception for other general exceptions.
      */
+    @Transactional
     public ParcelPickUpResponse pickUpParcel(ParcelPickUpRequest request) throws Exception {
         Cabinet cabinet = cabinetRepository.findByPickupCode(request.getPickupCode()).orElseThrow(InvalidPickupCodeException::new);
         Locker locker = cabinet.getLocker();

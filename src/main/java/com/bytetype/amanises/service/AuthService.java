@@ -22,6 +22,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -87,6 +88,7 @@ public class AuthService {
      * @throws UserExistException if a user with the same address already exists in the system with roles assigned.
      * @throws RoleNotFoundException if the role provided in the request does not exist.
      */
+    @Transactional
     public UserInfoResponse registerUser(SignupRequest request) throws NameExistException, UserExistException, RoleNotFoundException {
         User user;
 
@@ -150,6 +152,7 @@ public class AuthService {
      * @return true if the user exists and has been anonymized successfully, false if the user does not exist.
      * @throws RoleNotFoundException if the 'GUEST' role does not exist in the repository.
      */
+    @Transactional
     public boolean removeUser(Long id) throws RoleNotFoundException {
         if (userRepository.existsById(id)) {
             User user = userRepository.findById(id).orElse(null);

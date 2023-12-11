@@ -9,9 +9,13 @@ import com.bytetype.amanises.security.jwt.JwtTokenProvider;
 import com.bytetype.amanises.utility.LockerUtilities;
 import com.bytetype.amanises.utility.UserUtilities;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.icegreen.greenmail.configuration.GreenMailConfiguration;
+import com.icegreen.greenmail.junit5.GreenMailExtension;
+import com.icegreen.greenmail.util.ServerSetupTest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +32,7 @@ import java.util.List;
 import java.util.Random;
 
 import static com.bytetype.amanises.utility.ParcelUtilities.generateCode;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -34,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMockMvc
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "non-async"})
 public class ParcelControllerTests {
 
     @Autowired
@@ -68,6 +74,11 @@ public class ParcelControllerTests {
     private ObjectMapper objectMapper;
 
     private static final String className = ParcelControllerTests.class.getSimpleName();
+
+    @RegisterExtension
+    static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP)
+            .withConfiguration(GreenMailConfiguration.aConfig().withUser("springboot", "springboot"))
+            .withPerMethodLifecycle(false);
 
     private static class DataSet {
         private static final String[] username = { className + "User1", className + "User2" };
@@ -149,7 +160,7 @@ public class ParcelControllerTests {
         parcel.setHeight(random.nextDouble() * 5.0);
         parcel.setDepth(random.nextDouble() * 2.0);
         parcel.setMass(random.nextDouble() * 1.5);
-        parcel.setStatus(ParcelStatus.DELIVERED);
+        parcel.setStatus(ParcelStatus.DISTRIBUTE);
         parcel.setReadyForPickupAt(LocalDateTime.now());
         parcel.setDeliveryCode(generateCode(4));
         parcel = parcelRepository.saveAndFlush(parcel);
@@ -164,13 +175,12 @@ public class ParcelControllerTests {
         parcelExpectRepository.saveAll(parcelExpects);
 
         mockMvc.perform(get("/api/parcels")
-                        .param("status", ParcelStatus.DELIVERED.name())
                         .param("location", DataSet.location[0])
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$..status").value(ParcelStatus.DELIVERED.name()));
+                .andExpect(jsonPath("$..status").value(ParcelStatus.DISTRIBUTE.name()));
     }
 
     @Test
@@ -223,6 +233,15 @@ public class ParcelControllerTests {
         parcel.setReadyForPickupAt(LocalDateTime.now());
         parcel.setDeliveryCode(generateCode(4));
         parcel = parcelRepository.saveAndFlush(parcel);
+
+        List<ParcelExpect> parcelExpects = new ArrayList<>();
+
+        ParcelExpect parcelExpect = new ParcelExpect();
+        parcelExpect.setLocker(locker);
+        parcelExpect.setParcel(parcel);
+        parcelExpects.add(parcelExpect);
+
+        parcelExpectRepository.saveAllAndFlush(parcelExpects);
 
         cabinet.setParcel(parcel);
         cabinetRepository.saveAndFlush(cabinet);
@@ -294,8 +313,10 @@ public class ParcelControllerTests {
         parcel.setDepth(random.nextDouble() * 2.0);
         parcel.setMass(random.nextDouble() * 1.5);
         parcel.setReadyForPickupAt(LocalDateTime.now());
-        parcel.setDeliveryCode(generateCode(4));
         parcel = parcelRepository.saveAndFlush(parcel);
+
+        cabinet.setType(CabinetType.OPEN);
+        cabinet = cabinetRepository.saveAndFlush(cabinet);
 
         ParcelArriveRequest arriveRequest = new ParcelArriveRequest();
         arriveRequest.setId(parcel.getId());
@@ -311,6 +332,11 @@ public class ParcelControllerTests {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(ParcelStatus.READY_FOR_PICKUP.name()))
                 .andExpect(jsonPath("$.pickupCode").isString());
+
+        final MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+        final MimeMessage receivedMessage = receivedMessages[0];
+
+        assertEquals(DataSet.email[1], receivedMessage.getAllRecipients()[0].toString());
     }
 
     @Test

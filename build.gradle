@@ -33,6 +33,7 @@ dependencies {
 	// Spring boot
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -52,6 +53,9 @@ dependencies {
 
 	// Test database
 	testRuntimeOnly 'com.h2database:h2'
+
+	// Fake mail service
+	testImplementation 'com.icegreen:greenmail-junit5:1.6.5'
 }
 
 configurations {
