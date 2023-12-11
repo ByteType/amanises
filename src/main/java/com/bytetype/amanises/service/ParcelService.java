@@ -216,7 +216,7 @@ public class ParcelService {
         parcel.setStatus(ParcelStatus.DISTRIBUTE);
         parcel = parcelRepository.save(parcel);
 
-        cabinet.setParcel(parcel);
+        cabinet.setParcel(null);
         cabinet.setType(CabinetType.OPEN);
         cabinetRepository.save(cabinet);
 
