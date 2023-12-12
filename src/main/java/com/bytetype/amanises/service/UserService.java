@@ -13,8 +13,11 @@ import com.bytetype.amanises.repository.RoleRepository;
 import com.bytetype.amanises.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +31,21 @@ public class UserService {
 
     @Autowired
     private ParcelRepository parcelRepository;
+
+    /**
+     * Get all users based on role type, which used for robot or driver to check out users.
+     *
+     * @param type the role type for query.
+     * @return the user details list.
+     */
+    @Transactional
+    public List<UserPayload> getAllUsers(RoleType type) {
+        var users = userRepository.findByRoleType(type);
+
+        return users.stream()
+                .map(UserPayload::createFrom)
+                .collect(Collectors.toList());
+    }
 
     /**
      * Retrieves a detailed response object for a user by their unique identifier.
@@ -44,6 +62,7 @@ public class UserService {
      *                               defined elsewhere in the application to indicate this
      *                               specific error condition.
      */
+    @Transactional
     public UserDetailResponse getUserById(Long id) throws UserNotFoundException {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
 
@@ -71,27 +90,26 @@ public class UserService {
      * @return the existing or newly created user, or null if the request does not contain an ID or address
      * @throws RoleNotFoundException if the GUEST role is not present in the role repository
      */
-    public User getOrCreateUser(UserPayload request) throws RoleNotFoundException {
+    @Transactional
+    public Optional<User> getOrCreateUser(UserPayload request) throws RoleNotFoundException {
         if (request.getId() != null) {
             User user = userRepository.findById(request.getId()).orElse(null);
-            if (user != null) return user;
+            if (user != null) return Optional.of(user);
         }
         if (request.getUsername() != null) {
             User user = userRepository.findByUsername(request.getUsername()).orElse(null);
-            if (user != null) return user;
+            if (user != null) return Optional.of(user);
         }
         if (request.getAddress() != null) {
             User user = userRepository.findByAddress(request.getAddress()).orElse(null);
-            if (user != null) return user;
+            if (user != null) return Optional.of(user);
 
             HashSet<Role> roles = new HashSet<>();
             roles.add(roleRepository.findByName(RoleType.ROLE_GUEST).orElseThrow(RoleNotFoundException::new));
 
-            user = User.createFrom(request, roles);
-
-            return userRepository.save(user);
+            return Optional.of(userRepository.save(User.createFrom(request, roles)));
         }
 
-        return null;
+        return Optional.empty();
     }
 }

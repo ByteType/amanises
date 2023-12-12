@@ -37,6 +37,7 @@ public class DataBaseInjector {
     public void init() throws RoleNotFoundException {
         insertRolesIfNotExists();
         insertDriverIfNotExists();
+        insertRobotIfNotExists();
     }
 
     private void insertRolesIfNotExists() {
@@ -64,6 +65,21 @@ public class DataBaseInjector {
             userRepository.saveAndFlush(user);
 
             logger.info("Default driver account has been injected to database.");
+        }
+    }
+
+    private void insertRobotIfNotExists() throws RoleNotFoundException {
+        if (userRepository.findByUsername("Robot").isEmpty()) {
+            Set<Role> roles = new HashSet<>();
+            roles.add(roleRepository.findByName(RoleType.ROLE_DRIVER).orElseThrow(RoleNotFoundException::new));
+            roles.add(roleRepository.findByName(RoleType.ROLE_USER).orElseThrow(RoleNotFoundException::new));
+            User user = new User();
+            user.setUsername("Robot");
+            user.setPassword(passwordEncoder.encode("Password"));
+            user.setRoles(roles);
+            userRepository.saveAndFlush(user);
+
+            logger.info("Default Robot account has been injected to database.");
         }
     }
 }

@@ -26,6 +26,7 @@ public class LockerService {
     @Autowired
     private CabinetRepository cabinetRepository;
 
+    @Transactional
     public List<LockerPayload> getAllLocker() {
         List<Locker> lockers = lockerRepository.findAll();
 
@@ -34,6 +35,7 @@ public class LockerService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public LockerResponse getLockerStatusById(Long id) {
         Locker locker = lockerRepository.findByIdWithCabinets(id)
                 .orElseThrow(() -> new RuntimeException(String.format("Error: Not found locker with %d", id)));
@@ -46,6 +48,7 @@ public class LockerService {
         );
     }
 
+    @Transactional
     public LockerResponse getLockerStatusByLocation(String location) {
         Locker locker = lockerRepository.findByLocationWithCabinets(location)
                 .orElseThrow(() -> new RuntimeException(String.format("Error: Not found locker with %s", location)));

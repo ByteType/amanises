@@ -58,6 +58,7 @@ public class AuthService {
      * username, email, and roles.
      * @throws AuthenticationException if authentication fails due to invalid credentials or other authentication-related issues.
      */
+    @Transactional
     public UserInfoResponse authenticateUser(LoginRequest request) throws UserNotFoundException {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
@@ -70,7 +71,14 @@ public class AuthService {
         if (roles.contains(RoleType.ROLE_GUEST.toString()))
             throw new UserNotFoundException();
 
-        return new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles);
+        return new UserInfoResponse(
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail(),
+                userDetails.getPhone(),
+                userDetails.getAddress(),
+                roles
+        );
     }
 
     /**
@@ -135,6 +143,8 @@ public class AuthService {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
+                user.getPhone(),
+                user.getAddress(),
                 user.getRoles().stream()
                         .map(role -> role.getName().toString())
                         .collect(Collectors.toList())

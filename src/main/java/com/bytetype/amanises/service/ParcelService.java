@@ -19,6 +19,7 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,9 +52,10 @@ public class ParcelService {
      * @return ParcelDetailResponse containing detailed information about the parcel.
      * @throws ParcelNotFoundException if the parcel with the specified ID is not found.
      */
+    @Transactional
     public ParcelDetailResponse getParcelById(Long id) throws ParcelNotFoundException {
         Parcel parcel = parcelRepository.findById(id).orElseThrow(ParcelNotFoundException::new);
-        Cabinet cabinet = cabinetRepository.findByParcelId(id).orElse(null);
+        Optional<Cabinet> cabinet = cabinetRepository.findByParcelId(id);
 
         return new ParcelDetailResponse(
                 parcel.getId(),
@@ -68,8 +70,8 @@ public class ParcelService {
                 parcel.getPickedUpAt(),
                 parcel.getPickupCode(),
                 parcel.getDeliveryCode(),
-                cabinet != null ? cabinet.getLocker().getLocation() : null,
-                cabinet != null ? CabinetPayload.createFrom(cabinet) : null
+                cabinet.map(value -> value.getLocker().getLocation()).orElse(null),
+                cabinet.map(CabinetPayload::createFrom).orElse(null)
         );
     }
 
@@ -82,6 +84,7 @@ public class ParcelService {
      * @param location the expected location of the locker
      * @return a list of {@link Parcel} entities that match the given status and locker location
      */
+    @Transactional
     public List<ParcelPayload> getParcelsByExpectedLocation(String location) {
         List<Parcel> parcels = parcelRepository.findParcelsByExpectedLocation(location);
 
@@ -99,14 +102,12 @@ public class ParcelService {
      * @throws InvalidSenderException if the sender details are invalid.
      * @throws InvalidRecipientException if the recipient details are invalid.
      * @throws InvalidLockerException if the specified locker is invalid.
+     * @throws LockerFullException if the locker is full.
      */
     @Transactional
-    public ParcelCreateResponse createParcel(ParcelCreateRequest request) throws RoleNotFoundException, InvalidSenderException, InvalidRecipientException, InvalidLockerException {
-        User sender = userService.getOrCreateUser(request.getSender());
-        if (sender == null) throw new InvalidSenderException();
-
-        User recipient = userService.getOrCreateUser(request.getRecipient());
-        if (recipient == null) throw new InvalidRecipientException();
+    public ParcelCreateResponse createParcel(ParcelCreateRequest request) throws RoleNotFoundException, InvalidSenderException, InvalidRecipientException, InvalidLockerException, LockerFullException {
+        User sender = userService.getOrCreateUser(request.getSender()).orElseThrow(InvalidSenderException::new);
+        User recipient = userService.getOrCreateUser(request.getRecipient()).orElseThrow(InvalidRecipientException::new);
 
         Parcel parcel = new Parcel();
         parcel.setSender(sender);
@@ -128,7 +129,8 @@ public class ParcelService {
 
         for (Long expectLocker : expectedSenderLockers) {
             if (cabinetRepository.existsEmptyCabinetsByLockerId(expectLocker)) {
-                Cabinet cabinet = cabinetRepository.findEmptyCabinetsByLockerId(expectLocker).get(0);
+                Cabinet cabinet = cabinetRepository.findEmptyCabinetsByLockerId(expectLocker).stream().findFirst()
+                        .orElseThrow(LockerFullException::new);
                 cabinet.setParcel(parcel);
                 cabinet.setType(CabinetType.DELIVERY_PARCEL_EXIST);
                 cabinetRepository.save(cabinet);
@@ -325,6 +327,7 @@ public class ParcelService {
      * @param id The ID of the parcel to delete.
      * @throws RuntimeException if the parcel with the specified ID is not found.
      */
+    @Transactional
     public void deleteParcel(Long id) {
         Parcel parcel = parcelRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Parcel not found with id: " + id));

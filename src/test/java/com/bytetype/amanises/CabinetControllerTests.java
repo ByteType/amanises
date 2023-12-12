@@ -122,6 +122,21 @@ public class CabinetControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.type").value(CabinetType.OPEN.name()))
-                .andExpect(jsonPath("$.status").value(ParcelStatus.CREATE.name()));
+                .andExpect(jsonPath("$.parcel.status").value(ParcelStatus.CREATE.name()));
+    }
+
+    @Test
+    public void testGetFreeCabinets() throws Exception {
+        String token = "Bearer " + jwtTokenProvider.generateTokenFromUsername("Driver");
+
+        mockMvc.perform(get("/api/cabinets/free")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[*].id").exists())
+                .andExpect(jsonPath("$[*].type").exists())
+                .andExpect(jsonPath("$[*].parcel").exists())
+                .andExpect(jsonPath("$[*].lockerId").exists());
     }
 }
