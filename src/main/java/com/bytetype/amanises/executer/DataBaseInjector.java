@@ -55,7 +55,7 @@ public class DataBaseInjector {
     }
 
     private void insertDriverIfNotExists() throws RoleNotFoundException {
-        if (userRepository.findByRoleType(RoleType.ROLE_DRIVER).isEmpty()) {
+        if (userRepository.findByUsername("Driver").isEmpty()) {
             Set<Role> roles = new HashSet<>();
             roles.add(roleRepository.findByName(RoleType.ROLE_DRIVER).orElseThrow(RoleNotFoundException::new));
             User user = new User();
@@ -76,6 +76,7 @@ public class DataBaseInjector {
             User user = new User();
             user.setUsername("Robot");
             user.setPassword(passwordEncoder.encode("Password"));
+            user.setAddress("1 Alder Lane, Riverwood, Whiterun Hold, Skyrim");
             user.setRoles(roles);
             userRepository.saveAndFlush(user);
 

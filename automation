@@ -1,0 +1,138 @@
+#!/bin/bash
+
+BASE_URL="https://bytetype-cea685bb8e38.herokuapp.com/api"
+AUTH_URL="${BASE_URL}/auth"
+USER_URL="${BASE_URL}/user"
+PARCEL_URL="${BASE_URL}/parcels"
+LOCKER_URL="${BASE_URL}/lockers"
+CABINET_URL="${BASE_URL}/cabinets"
+
+login() {
+  local username=$1
+  local password=$2
+  response=$(curl -s -X POST "${AUTH_URL}/signin" -H "Content-Type: application/json" -d "{\"username\": \"${username}\", \"password\": \"${password}\"}")
+  if [ $? -ne 0 ]; then
+    echo "Login failed"
+    exit 1
+  fi
+  echo "$response"
+}
+
+getUsers() {
+  local token=$1
+  response=$(curl -s "${USER_URL}/all?role=ROLE_USER" -H "Authorization: Bearer ${token}")
+  if [ $? -ne 0 ]; then
+    echo "Get users failed"
+    exit 1
+  fi
+  echo "$response"
+}
+
+getCabinets() {
+  local token=$1
+  response=$(curl -s "${CABINET_URL}/free" -H "Authorization: Bearer ${token}")
+  if [ $? -ne 0 ]; then
+    echo "Get cabinets failed"
+    exit 1
+  fi
+  echo "$response"
+}
+
+getLockers() {
+  response=$(curl -s "${LOCKER_URL}/all")
+  if [ $? -ne 0 ]; then
+    echo "Get lockers failed"
+    exit 1
+  fi
+  echo "$response"
+}
+
+createParcel() {
+  local token=$1
+  local parcelData=$2
+  response=$(curl -s -X POST "${PARCEL_URL}" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "$parcelData")
+  if [ $? -ne 0 ]; then
+    echo "Parcel creation failed"
+    exit 1
+  fi
+  echo "$response"
+}
+
+shuffleArray() {
+  local array=("$@")
+  for ((i=${#array[@]}-1; i>0; i--)); do
+    local j=$((RANDOM % (i+1)))
+    local temp=${array[i]}
+    array[i]=${array[j]}
+    array[j]=$temp
+  done
+  echo "${array[@]}"
+}
+
+# Main process
+login_response=$(login "Robot" "Password")
+echo "Debug: Login response: $login_response"
+
+token=$(echo "$login_response" | grep -o '"token": *"[^"]*"' | sed -E 's/"token": *"([^"]*)"/\1/')
+id=$(echo "$login_response" | grep -o '"id": *[0-9]*' | sed -E 's/"id": *//')
+echo "Debug: Extracted id: $id, token: $token"
+
+users=$(getUsers "$token")
+echo "Debug: Users: $users"
+cabinets=$(getCabinets "$token")
+echo "Debug: Cabinets: $cabinets"
+lockers=$(getLockers)
+echo "Debug: Lockers: $lockers"
+
+readarray -t user_ids <<< "$(echo "$users" | grep -o '"id": *[0-9]*' | grep -v '"id":'"$id" | sed -E 's/"id": *//')"
+echo "Debug: user_ids Array: ${user_ids[*]}"
+
+readarray -t usernames <<< "$(echo "$users" | grep -o '"username": *"[^"]*"' | sed -E 's/"username": *"([^"]*)"/\1/')"
+echo "Debug: usernames Array: ${usernames[*]}"
+
+readarray -t cabinet_ids <<< "$(echo "$cabinets" | grep -o '"id": *[0-9]*' | sed -E 's/"id": *//')"
+echo "Debug: cabinet_ids Array: ${cabinet_ids[*]}"
+
+readarray -t locker_ids <<< "$(echo "$lockers" | grep -o '"id": *[0-9]*' | sed -E 's/"id": *//')"
+echo "Debug: locker_ids Array: ${locker_ids[*]}"
+
+# Shuffle user IDs and select first 3 (or fewer)
+shuffled_user_ids=("$(shuffleArray "${user_ids[@]}")")
+selected_user_ids=("${shuffled_user_ids[@]:0:3}")
+selected_user_ids=($selected_user_ids)
+echo "Debug: Selected user IDs: ${selected_user_ids[*]}"
+
+for i in "${!selected_user_ids[@]}"; do
+  user_id=${selected_user_ids[i]}
+  cabinet_id=${cabinet_ids[i % ${#cabinet_ids[@]}]}
+  locker_id=${locker_ids[RANDOM % ${#locker_ids[@]}]}
+  echo "Debug: Processing user_id: $user_id, cabinet_id: $cabinet_id, locker_id: $locker_id"
+
+  # Random dimensions and mass for parcel
+  width=$(awk -v min=10 -v max=20 'BEGIN{srand(); print min + rand() * (max - min)}')
+  height=$(awk -v min=10 -v max=20 'BEGIN{srand(); print min + rand() * (max - min)}')
+  depth=$(awk -v min=10 -v max=20 'BEGIN{srand(); print min + rand() * (max - min)}')
+  mass=$(awk -v min=10 -v max=20 'BEGIN{srand(); print min + rand() * (max - min)}')
+
+  # Parcel data
+  parcelData=$(cat <<EOF
+{
+  "sender": { "id": "$id" },
+  "recipient": { "id": "$user_id" },
+  "width": $width,
+  "height": $height,
+  "depth": $depth,
+  "mass": $mass,
+  "readyForPickupAt": "$(date -Iseconds)",
+  "expectedSenderLockers": ["$cabinet_id"],
+  "expectedRecipientLockers": ["$locker_id"]
+}
+EOF
+  )
+
+  # Create parcel and log
+  parcel_response=$(createParcel "$token" "$parcelData")
+  parcel_id=$(echo "$parcel_response" | grep -o '"id": *[0-9]*' | sed -E 's/"id": *//')
+
+  echo "Send parcel to lucky user: ${usernames[i]}, parcel: $parcel_id, cabinet: $cabinet_id"
+done
